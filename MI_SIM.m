@@ -46,7 +46,7 @@ end
 
 % --- Executes just before MI_SIM is made visible.
 function MI_SIM_OpeningFcn(hObject, eventdata, handles, varargin)
-
+%pwd=MISIM_nu2016;
 
 %reset the plots
 axes(handles.solutionplot);
@@ -77,13 +77,9 @@ set(handles.growthmenu,'Value',1);
 set(handles.km1_in,'String',13);
 set(handles.y1_in,'String',0.04);
 set(handles.kdec1_in,'String',0.02);
-set(handles.km2_in,'String',35);
-set(handles.y2_in,'String',0.06);
-set(handles.kdec2_in,'String',0.02);
 set(handles.s1in_in,'String',5);
 set(handles.ki2_in,'String',0.0000035);
 set(handles.ks1_in,'String',0.3);
-set(handles.ks2_in,'String',0.000025);
 set(handles.ks1a_in,'String',3);
 set(handles.ks2a_in,'String',2);
 set(handles.d_in,'String',0.1);
@@ -92,10 +88,14 @@ set(handles.s1_init,'String',0.1);
 set(handles.x1_init,'String',0.1);
 set(handles.s2_init,'String',0.1);
 set(handles.x2_init,'String',0.1);
+set(handles.s3_init,'String',0.1);
+set(handles.x3_init,'String',0.1);
 set(handles.fixed_points_s1,'String','-');
 set(handles.fixed_points_x1,'String','-');
 set(handles.fixed_points_s2,'String','-');
 set(handles.fixed_points_x2,'String','-');
+set(handles.fixed_points_s3,'String','-');
+set(handles.fixed_points_x3,'String','-');
 set(handles.fixed_points_stability,'String','-');
 set(handles.solver,'Value',3);
 set(handles.abstol,'String','1e-8');
@@ -107,7 +107,7 @@ set(handles.lsanaly,'Value',1,'ForegroundColor',[0.078, 0.169, 0.549])
 set(handles.routhcrit,'Value',0,'ForegroundColor','r')
 set(handles.jacobian_but,'Value',0,'ForegroundColor','r')
 set(handles.uipanel6,'Title','Plot of trajectory from initial conditions')
-set(handles.spmatrix,'Visible','off'); set(handles.bifursp,'Visible','off')
+set(handles.spmatrix,'Visible','off'); 
 set(handles.twodphase,'Enable','off'); set(handles.threedphase,'Enable','off')
 set(handles.colormp,'Visible','off');
 set(handles.normeig,'Visible','off','Value',0)
@@ -121,7 +121,6 @@ else
     set(handles.reportpanel,'Visible','on');set(handles.email_add,'Enable','on'); set(handles.server_add,'Enable','on')
     set(handles.email_txt,'Enable','on'); set(handles.serv_txt,'Enable','on');
 end
-handles.mpltopt=0;
 handles.yout_phase=[];
 handles.clcyc=1;
 axes(handles.motif_image)
@@ -889,9 +888,11 @@ set(handles.cooperation,'Checked','off'); set(handles.amensalism,'Checked','off'
 set(handles.spmatrix,'Visible','off'); axes(handles.spmatrix); cla
 handles.motif='fc';
 axes(handles.motif_image)
-imshow('motifs_images/fc.eps');
+imshow('motifs_images/fc.png');
 set(handles.plot_button,'enable','off')
 set(handles.plot_button2,'enable','off')
+set(handles.s1_check,'value',1,'enable','on'); set(handles.x1_check,'value',1,'enable','on')
+set(handles.s2_check,'value',1,'enable','on'); set(handles.x2_check,'value',1,'enable','on')
 set(handles.s3_check,'value',0,'enable','off'); set(handles.x3_check,'value',0,'enable','off')
 set(handles.s3_init,'enable','off'); set(handles.s3_init_text,'enable','off')
 set(handles.s2_init,'enable','on'); set(handles.x3_init,'enable','off') 
@@ -960,6 +961,8 @@ axes(handles.motif_image)
 imshow('motifs_images/sc.png');
 set(handles.plot_button,'enable','off')
 set(handles.plot_button2,'enable','off')
+set(handles.s1_check,'value',1,'enable','on'); set(handles.x1_check,'value',1,'enable','on')
+set(handles.s2_check,'value',0,'enable','off'); set(handles.x2_check,'value',1,'enable','on')
 set(handles.s3_check,'value',0,'enable','off'); set(handles.x3_check,'value',0,'enable','off')
 set(handles.s3_init,'enable','off'); set(handles.s3_init_text,'enable','off')
 set(handles.s2_init,'enable','off');set(handles.x3_init,'enable','off') 
@@ -1028,7 +1031,9 @@ axes(handles.motif_image)
 imshow('motifs_images/fcpi.png');
 set(handles.plot_button,'enable','off')
 set(handles.plot_button2,'enable','off')
-set(handles.s3_check,'value',0,'enable','off'); set(handles.x3_check,'value',0,'enable','off')
+set(handles.s1_check,'value',1,'enable','on'); set(handles.x1_check,'value',1,'enable','on')
+set(handles.s2_check,'value',1,'enable','on'); set(handles.x2_check,'value',1,'enable','on')
+set(handles.s3_check,'value',1,'enable','on'); set(handles.x3_check,'value',0,'enable','off')
 set(handles.s3_init,'enable','on'); set(handles.s3_init_text,'enable','on')
 set(handles.s2_init,'enable','on');set(handles.x3_init,'enable','off') 
 set(handles.x3_init_text,'enable','off'); set(handles.S2_0,'enable','on')
@@ -1100,6 +1105,8 @@ axes(handles.motif_image)
 imshow('motifs_images/ni.png');
 set(handles.plot_button,'enable','off')
 set(handles.plot_button2,'enable','off')
+set(handles.s1_check,'value',1,'enable','on'); set(handles.x1_check,'value',1,'enable','on')
+set(handles.s2_check,'value',1,'enable','on'); set(handles.x2_check,'value',1,'enable','on')
 set(handles.s3_check,'value',0,'enable','off'); set(handles.x3_check,'value',0,'enable','off')
 set(handles.s3_init,'enable','off'); set(handles.s3_init_text,'enable','off')
 set(handles.s2_init,'enable','on');set(handles.x3_init,'enable','off') 
@@ -1168,6 +1175,8 @@ axes(handles.motif_image)
 imshow('motifs_images/syn.png');
 set(handles.plot_button,'enable','off')
 set(handles.plot_button2,'enable','off')
+set(handles.s1_check,'value',1,'enable','on'); set(handles.x1_check,'value',1,'enable','on')
+set(handles.s2_check,'value',1,'enable','on'); set(handles.x2_check,'value',1,'enable','on')
 set(handles.s3_check,'value',0,'enable','off'); set(handles.x3_check,'value',0,'enable','off')
 set(handles.s3_init,'enable','off'); set(handles.s3_init_text,'enable','off')
 set(handles.s2_init,'enable','on');set(handles.x3_init,'enable','off') 
@@ -1237,6 +1246,8 @@ axes(handles.motif_image)
 imshow('motifs_images/wpi.png');
 set(handles.plot_button,'enable','off')
 set(handles.plot_button2,'enable','off')
+set(handles.s1_check,'value',1,'enable','on'); set(handles.x1_check,'value',1,'enable','on')
+set(handles.s2_check,'value',1,'enable','on'); set(handles.x2_check,'value',1,'enable','on')
 set(handles.s3_check,'value',1,'enable','on'); set(handles.x3_check,'value',0,'enable','off')
 set(handles.s3_init,'enable','on'); set(handles.s3_init_text,'enable','on')
 set(handles.s2_init,'enable','on'); set(handles.x3_init,'enable','off') 
@@ -1269,9 +1280,9 @@ colorbar off
 eqtx1='$\frac{dS_1}{dt} = D(S_{1,in} - S_1) - f_1X_1$';
 eqtx2='$\frac{dX_1}{dt} = -DX_1 + Y_1f_1X_1 - k_{dec,1}X_1$';
 eqtx3='$\frac{dS_2}{dt} = -DS_2 + \gamma(1-Y_1)f_1X_1$';
-eqtx4='$\frac{dX_2}{dt} = -DX_2 + Y_3f_3X_2I_4 - k_{dec,3}X_2$';
-eqtx5='$\frac{dS_3}{dt} = D(S_{3,in}-S_3) - f_3X_2I_4$';
-I3tx = '$I_4 = \frac{1}{1+\frac{K_{i,2}}{S_2}}$';
+eqtx4='$\frac{dX_2}{dt} = -DX_2 + Y_3f_3X_2I_2 - k_{dec,3}X_2$';
+eqtx5='$\frac{dS_3}{dt} = D(S_{3,in}-S_3) - f_3X_2I_2$';
+I3tx = '$I_2 = \frac{1}{1+\frac{S_2}{K_{i,2}}}$';
 
 switch handles.growthmodel
     case 'Monod'
@@ -1308,6 +1319,8 @@ axes(handles.motif_image)
 imshow('motifs_images/ths.png');
 set(handles.plot_button,'enable','off')
 set(handles.plot_button2,'enable','off')
+set(handles.s1_check,'value',1,'enable','on'); set(handles.x1_check,'value',1,'enable','on')
+set(handles.s2_check,'value',1,'enable','on'); set(handles.x2_check,'value',1,'enable','on')
 set(handles.s3_check,'value',1,'enable','on'); set(handles.x3_check,'value',1,'enable','on')
 set(handles.s3_init,'enable','on'); set(handles.s3_init_text,'enable','on')
 set(handles.s2_init,'enable','on'); set(handles.x3_init,'enable','on') 
@@ -1767,24 +1780,6 @@ guidata(hObject,handles)
 % --- Executes on button press in parallel.
 function parallel_Callback(hObject, eventdata, handles)
 
-% --- Executes on selection change in bifursp.
-function bifursp_Callback(hObject, eventdata, handles)
-fp=get(handles.bifursp,'Value');
-if fp>1
-    handles.mpltopt=1; handles.simtype='multiple_p';
-    run_script_gui
-else
-    handles.mpltopt=0;
-end
-guidata(hObject,handles)
-
-% --- Executes during object creation, after setting all properties.
-function bifursp_CreateFcn(hObject, eventdata, handles)
-
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
 
 % --------------------------------------------------------------------
 function undock_Callback(hObject, eventdata, handles)
@@ -1878,6 +1873,9 @@ if strcmp(val_p,'on') && strcmp(val_pp,'off')
 else
     ax=axes;
     new_h=copyobj(handles.plothandle,ax,'legacy');
+    xlabel(get(handles.xlabelhandle,'String'));
+    ylabel(get(handles.ylabelhandle,'String'));
+    zlabel(get(handles.zlabelhandle,'String'));
     grid on
     axis tight
 end
@@ -1932,17 +1930,6 @@ function server_add_Callback(hObject, eventdata, handles)
 
 % --- Executes during object creation, after setting all properties.
 function server_add_CreateFcn(hObject, eventdata, handles)
-
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on selection change in solmeth_select.
-function solmeth_select_Callback(hObject, eventdata, handles)
-
-% --- Executes during object creation, after setting all properties.
-function solmeth_select_CreateFcn(hObject, eventdata, handles)
 
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');

@@ -105,8 +105,6 @@ xvarop = get(handles.simparam1,'Value'); yvarop = get(handles.simparam2,'Value')
 
 xvar = xvarls(xvarop,:); yvar = yvarls(yvarop,:);
 axes(handles.trajectoryplot); cla
-xlabel(xvar,'FontSize',18)
-ylabel(yvar,'FontSize',18)
 
 %Set up progress bar
 total_steps = length(x)*length(y);
@@ -380,7 +378,7 @@ for i=1:length(x)
         iter=j+length(y)*(i-1);
         total_tim=(iter)*100/(length(x)*length(y));
         set(handles.progress,'String',['Progress: ',num2str(total_tim),'%'])
-        %pause(0.000000000000000001)
+        drawnow
         
         %choose error
         error=str2double(get(handles.error_val,'String'));
@@ -407,6 +405,10 @@ if mean(std(z_boa'))==0
 else
     contourf(x,y,z_boa','linestyle','none','levelstep',1)
 end
+
+%Labels
+xlabel(strcat(xvar,'(0)'),'FontSize',18)
+ylabel(strcat(yvar,'(0)'),'FontSize',18)
 
 hold on
 
@@ -439,8 +441,8 @@ for k=1:size(fixed_numerical,1)
 end
 
 %Save Report
-newfig_l=figure;
-axesobject_l=copyobj(handles.trajectoryplot,newfig_l);
-title('Basin of Attraction')
-export_fig temp_fig/ExpandReport -pdf -r600 -append
-close(newfig_l)
+% newfig_l=figure;
+% axesobject_l=copyobj(handles.trajectoryplot,newfig_l);
+% title('Basin of Attraction')
+% export_fig temp_fig/ExpandReport -pdf -r600 -append
+% close(newfig_l)

@@ -79,8 +79,12 @@ switch which_plot
         switch handles.plotsolution
             
             case 'time' %Time series plot
-                
-                axes(handles.solutionplot);
+                try
+                    axes(handles.solutionplot); 
+                catch
+                    subplot(1,1,1)
+                    handles.solutionplot=gca;
+                end
                 %reset the plot
                 cla reset
                 
@@ -134,7 +138,7 @@ switch which_plot
                 ylabel(handles.solutionplot,'Concentration (kgCOD m^{-3})')
                 ylimit=get(handles.solutionplot,'Ylim');
                 set(handles.solutionplot,'Ylim',[0 ylimit(2)]);
-                leg=legend(legd);
+                handles.legend1=legend(legd,'location','best');
                 hold off
                 
                 %Generate image of parameters
@@ -186,7 +190,7 @@ switch which_plot
                 
                 %Save Report
                 newfig_b=figure;
-                axesobject_b=copyobj(handles.solutionsplot,newfig_b);
+                axesobject_b=copyobj(handles.solutionplot,newfig_b);
                 title('Phase Plot')
                 export_fig temp_fig/ExpandReport -pdf -r600 -append
                 close(newfig_b)
@@ -231,29 +235,34 @@ switch which_plot
                 elseif nstat==1
                     handles.clcyc=handles.clcyc+1; hold all
                     for k=1:N
-
+                        
                         axes(handles.hsub(k))
                         hold on
                         
                         plot(handles.hsub(k),tout,yout_n(:,k),'linewidth',2,'color',list(handles.clcyc,:))
-                        %legend(vc(k)); 
                         ylim=get(gca,'Ylim');
                         set(gca,'Xlim',[0 tout(end)],'Ylim',[0 ylim(2)]);
 
                         handles.plotaxes_sub{k}=get(gca,'Children');
                     end
                 end
+
+                %Adds axis labels in centre of subplots
+                AxesH    = findobj(handles.hsub, 'Type', 'Axes');
+                YLabelHC = get(AxesH, 'YLabel'); XLabelHC = get(AxesH,'XLabel');
+                YLabelH  = [YLabelHC{:}]; XLabelH  = [XLabelHC{:}];
+                set(YLabelH, 'String', 'Conc. (kgCOD/m^3)')
+                set(XLabelH, 'String', 'Time (d)')
                 
-                %adds axis labels
                 %suplabel('Time (days)');
                 %suplabel('Concentration (kgCOD m^{-3})','y');
                 
                 %Save Report
-                newfig_c=figure;
-                axesobject_c=copyobj(handles.solutionplot,newfig_c);
-                title('Individual subplots of solutions')
-                export_fig temp_fig/ExpandReport -pdf -r600 -append
-                close(newfig_c)
+%                 newfig_c=figure;
+%                 axesobject_c=copyobj(handles.solutionplot,newfig_c);
+%                 title('Individual subplots of solutions')
+%                 export_fig temp_fig/ExpandReport -pdf -r600 -append
+%                 close(newfig_c)
                 
             case 'eig' %Eigenvalue plot
                 axes(handles.solutionplot);
@@ -353,11 +362,11 @@ switch which_plot
                 set(handles.overlay,'enable','on')
                 
                 %Save Report
-                newfig_e=figure;
-                axesobject_e=copyobj(handles.trajectoryplot,newfig_e);
-                title('2D Trajectory Plot')
-                export_fig temp_fig/ExpandReport -pdf -r600 -append
-                close(newfig_e)
+%                 newfig_e=figure;
+%                 axesobject_e=copyobj(handles.trajectoryplot,newfig_e);
+%                 title('2D Trajectory Plot')
+%                 export_fig temp_fig/ExpandReport -pdf -r600 -append
+%                 close(newfig_e)
                 
             case 'three' %3D plot
                 %if user wants to overlay multiple trajectories onto the plot of
@@ -410,6 +419,9 @@ switch which_plot
         end
         
 end
+handles.xlabelhandle=get(gca,'Xlabel');
+handles.ylabelhandle=get(gca,'Ylabel');
+handles.zlabelhandle=get(gca,'Zlabel');
 handles.plothandle=get(gca,'Children');
 guidata(hObject,handles);
 

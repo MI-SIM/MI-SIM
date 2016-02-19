@@ -67,10 +67,12 @@ nz = nnz(Jpat);
 pct = 100 / nuE;
 xlabel(sprintf('nonzeros = %d (%.3f%%)',nz,nz*pct));
 set(gca,'Xticklabel',cellstr(var_order1),'Yticklabel',cellstr(var_order1),'Xtick',1:length(Jpat),'Ytick',1:length(Jpat))
-
+try
+    delete(handles.htxt)
+end
 axes(handles.txax)
 
-htxt=text(1.4,0.5,'Jacobian Sparsity Matrix','interpreter','latex','horiz','left','vert','middle','fontsize',14);
+htxt=text(1.9,0.95,'Jacobian Sparsity Matrix','interpreter','latex','horiz','left','vert','middle','fontsize',12);
 handles.htxt=htxt;
 if stabanaly==1 %Linear stability analysis
     for i=1:length(fixed_numerical1(:,1))
@@ -115,12 +117,9 @@ if stabanaly==1 %Linear stability analysis
             tt=time1;
             flag=[];
             eval(['[~,yout2]=',solver,'(@model_gen, 0:0.01:time1, init, options, S1in, D, Y1, kdec1, Y2, kdec2, Y3, kdec3, km1, Ks1, km2, Ks2, km3, Ks3, Ks3c, KI2, gamma0,gamma1,gamma2, S2in, S3in,h,h1,tt,motif,flag);']);
-              
-            %[~,yout3]=ode23s(@model_gen, 0:0.01:100, abs(initial-[0.00001 0 0.00001 0]), options, Spin1, D1, Yp1, kdecp1, YH1, kdecH1, kmp1, Ksp1, kmH1, KsH1, KIH1);
-            
+
         elseif growth==2
             [~,yout2]=ode23s(@four_mod2, [0:0.01:time1], init, options, Spin1, D, Yp1, kdecp1, YH1, kdecH1, kmp1, kmH1, Ksxp1, KsxH1, KIH1); %CHANGE FOR ADDITIONAL substrate 3
-            %[~,yout3]=ode23s(@four_mod2, [0:0.01:time1], abs(initial-[0.00001 0 0.00001 0]), options, Spin1, D1, Yp1, kdecp1, YH1, kdecH1, kmp1, kmH1, Ksxp1, KsxH1, KIH1);
         end
         
         %calculate the difference between the trajectories

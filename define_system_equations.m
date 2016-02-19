@@ -76,7 +76,7 @@ switch motif
         I3=[]; I4=[];
 
     case 'pi'
-        I4 = 1/(1+KI2/S2);
+        I4 = 1/(1+S2/KI2);
         eq1=D*(S1in-S1)-f1*X1;
         eq2=-D*X1+Y1*f1*X1-kdec1*X1;
         eq3=-D*S2+gamma0*(1-Y1)*f1*X1;
