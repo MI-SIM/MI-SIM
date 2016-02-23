@@ -5,8 +5,8 @@
 % Newcastle University, Newcastle-upon-Tyne UK NE1 7RU
 % email address: matthew.wade@ncl.ac.uk; dr.matthewwade@ncl.ac.uk
 % alternative contact: Dr. Nick Parker, nick.parker@ncl.ac.uk
-% Website: SOFTWARE HOSTED SITE
-% September 2015; Last revision: 04-Jan-2016
+% Website: https://github.com/MI-SIM/MI-SIM
+% September 2015; Last revision: 23-Feb-2016
 
 %% Preamble
 %Enable reporting
@@ -47,14 +47,6 @@ end
 %Define system equations
 [eqs, f1, f2, f3, I2, I3, I4]=define_system_equations(motif,growth);
 
-%Check that an existing modelled growth function is selected
-if growth~=1 && growth~=2
-    warning('Please select either Monod or Contois')
-    return
-else
-end
-
-
 %% Algorithms
 %Case structure for analysis routines
 switch handles.simtype
@@ -62,9 +54,10 @@ switch handles.simtype
         
         %Get the symbolic variables and parameters
         variables=set_variables(growth);
-        if growth==1
+        switch growth
+            case 'Monod'
             parameters=[km1 Y1 kdec1 km2 Y2 kdec2 km3 Y3 kdec3 KI2 D S1in S2in S3in time1 Ks1 Ks2 Ks3 Ks3c gamma0 gamma1 gamma2];
-        elseif growth==2
+            case 'Contois'
             parameters=[km1 Y1 kdec1 km2 Y2 kdec2 km3 Y3 kdec3 KI2 D S1in s2in S3in time1 Ks1a Ks2a Ks3a Ks3c gamma0 gamma1 gamma2];
         end
         
@@ -86,18 +79,21 @@ switch handles.simtype
             assumeAlso(S1>=0); assumeAlso(X1>=0); assumeAlso(X2>=0); %Make assumptions (X,S real non-negative)
             %Use mupad to get all solutions
             sol=feval(symengine,'solve',[eq1_numerical==0 eq2_numerical==0 eq3_numerical==0],[S1,X1,X2]);
-            temp=vpa(sol);
-            members=children(children(temp));
-            solutions = cellfun(@(c)c(:),members,'UniformOutput',false);
-            num_sol=children(solutions{2});
             
-            %Check for valid imaginary parts
-            s_imag=sum(any(imag(double(vpa(num_sol)))>1e-12));
-            if s_imag==0
-                doub_sol=real(double(vpa(num_sol)));
-            else
-                doub_sol=double(vpa(num_sol));
+            sol=children(sol);
+ 
+            % Loop over solutions
+            doub_sol=[];
+            for i=1:numel(sol)
+                pairs=children(sol{i});
+                t=zeros(1,numel(pairs));
+                for j=1:numel(pairs)
+                    temp=pairs{j};
+                    t(j)=double(temp(2));
+                end
+                doub_sol(i,:)=t;
             end
+            
             set(handles.s1_check,'Enable','on','value',1); set(handles.x1_check,'Enable','on','value',1);
             set(handles.s2_check,'Enable','off','value',0); set(handles.x2_check,'Enable','on','value',1);
             set(handles.s3_check,'Enable','off','value',0); set(handles.x3_check,'Enable','off','value',0);
@@ -106,18 +102,21 @@ switch handles.simtype
             assumeAlso(S1>=0); assumeAlso(X1>=0); assumeAlso(S2>=0); assumeAlso(X2>=0); %Make assumptions (X,S real non-negative)
             %Use mupad to get all solutions
             sol=feval(symengine,'solve',[eq1_numerical==0 eq2_numerical==0 eq3_numerical==0 eq4_numerical==0],[S1,X1,S2,X2]);
-            temp=vpa(sol);
-            members=children(children(temp));
-            solutions = cellfun(@(c)c(:),members,'UniformOutput',false);
-            num_sol=children(solutions{2});
             
-            %Check for valid imaginary parts
-            s_imag=sum(any(imag(double(vpa(num_sol)))>1e-12));
-            if s_imag==0
-                doub_sol=real(double(vpa(num_sol)));
-            else
-                doub_sol=double(vpa(num_sol));
+            sol=children(sol);
+            
+            % Loop over solutions
+            doub_sol=[];
+            for i=1:numel(sol)
+                pairs=children(sol{i});
+                t=zeros(1,numel(pairs));
+                for j=1:numel(pairs)
+                    temp=pairs{j};
+                    t(j)=double(temp(2));
+                end
+                doub_sol(i,:)=t;
             end
+
             set(handles.s1_check,'Enable','on','value',1); set(handles.x1_check,'Enable','on','value',1);
             set(handles.s2_check,'Enable','on','value',1); set(handles.x2_check,'Enable','on','value',1);
             set(handles.s3_check,'Enable','off','value',0); set(handles.x3_check,'Enable','off','value',0);
@@ -126,18 +125,21 @@ switch handles.simtype
             assumeAlso(S1>=0); assumeAlso(X1>=0); assumeAlso(S2>=0); assumeAlso(X2>=0); assumeAlso(S3>=0); %Make assumptions (X,S real non-negative)
             %Use mupad to get all solutions
             sol=feval(symengine,'solve',[eq1_numerical==0 eq2_numerical==0 eq3_numerical==0 eq4_numerical==0 eq5_numerical==0],[S1,X1,S2,X2,S3]);
-            temp=vpa(sol);
-            members=children(children(temp));
-            solutions = cellfun(@(c)c(:),members,'UniformOutput',false);
-            num_sol=children(solutions{2});
             
-            %Check for valid imaginary parts
-            s_imag=sum(any(imag(double(vpa(num_sol)))>1e-12));
-            if s_imag==0
-                doub_sol=real(double(vpa(num_sol)));
-            else
-                doub_sol=double(vpa(num_sol));
+            sol=children(sol);
+ 
+            % Loop over solutions
+            doub_sol=[];
+            for i=1:numel(sol)
+                pairs=children(sol{i});
+                t=zeros(1,numel(pairs));
+                for j=1:numel(pairs)
+                    temp=pairs{j};
+                    t(j)=double(temp(2));
+                end
+                doub_sol(i,:)=t;
             end
+            
             set(handles.s1_check,'Enable','on','value',1); set(handles.x1_check,'Enable','on','value',1);
             set(handles.s2_check,'Enable','on','value',1); set(handles.x2_check,'Enable','on','value',1);
             set(handles.s3_check,'Enable','on','value',1); set(handles.x3_check,'Enable','off','value',0);
@@ -242,16 +244,19 @@ switch handles.simtype
         
         %% Dynamics
         %Run solver - Dynamics
-        if growth==1
-            set(handles.func_prog,'String','Running: Dynamics','ForegroundColor','r')
-            h=handles.timestamp;
-            h1=handles.progress;
-            tt=time1; flag=[]; cno=[];
-            te = cputime;
-            eval(['[tout,yout]=',solver,'(@model_gen, [0:0.01:time1], init2, options, S1in, D, Y1, kdec1, Y2, kdec2, Y3, kdec3, km1, Ks1, km2, Ks2, km3, Ks3, Ks3c, KI2,gamma0, gamma1, gamma2, S2in, S3in,h,h1,tt,motif,flag,cno);']);
-            tfe= cputime-te;
-        elseif growth==2
-            eval(['[tout,yout]=ode23s(@four_mod2, [0:0.01:time1], init2, options, S1in, D, Y1, kdec1, Y2, kdec2, Y3, kdec3, km1, Ks1a, km2, Ks2a, km3, Ks3a, KI2,gamma0,S3in);']);
+        set(handles.func_prog,'String','Running: Dynamics','ForegroundColor','r')
+        h=handles.timestamp;
+        h1=handles.progress;
+        tt=time1; flag=[]; cno=[];
+        switch growth
+            case 'Monod'
+                te = cputime;
+                eval(['[tout,yout]=',solver,'(@model_gen, [0:0.01:time1], init2, options, S1in, D, Y1, kdec1, Y2, kdec2, Y3, kdec3, km1, Ks1, km2, Ks2, km3, Ks3, Ks3c, KI2,gamma0, gamma1, gamma2, S2in, S3in,h,h1,tt,motif,flag,cno);']);
+                tfe= cputime-te;
+            case 'Contois'
+                te = cputime;
+                eval(['[tout,yout]=ode23s(@four_mod2, [0:0.01:time1], init2, options, S1in, D, Y1, kdec1, Y2, kdec2, Y3, kdec3, km1, Ks1a, km2, Ks2a, km3, Ks3a, KI2,gamma0,S3in);']);
+                tfe= cputime-te;
         end
         set(handles.func_prog,'String','Completed: Dynamics','ForegroundColor',[0 0.6 1])
         handles.tout=tout;

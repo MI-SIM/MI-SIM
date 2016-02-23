@@ -1,12 +1,16 @@
-%NUMERICAL METHOD
-%this code introduces a pertubation in the parameter space and sees if it remains
-%at the fixed points.
+%stability_analysis - perform linear stability analysis and/or
+%Routh-Hurwitz on the fixed-point solutions
+%
+% Author: Dr. Matthew Wade, School of Civil Engineering & Geosciences
+% Newcastle University, Newcastle-upon-Tyne UK NE1 7RU
+% email address: matthew.wade@ncl.ac.uk; dr.matthewwade@ncl.ac.uk
+% alternative contact: Dr. Nick Parker, nick.parker@ncl.ac.uk
+% Website: https://github.com/MI-SIM/MI-SIM
+% September 2015; Last revision: 19-Feb-2016
 
-%NOTE: the commented code introduces a perturbation in the opposite
-%direction however this uses more memory and slows down the calculation
-    if exist('handles.htxt')
-        delete(handles.htxt)
-    end
+if exist('handles.htxt')
+    delete(handles.htxt)
+end
 stabanaly=get(handles.lsanaly,'Value');
 stabanaly2=get(handles.routhcrit,'Value');
 jacobanaly=get(handles.jacobian_but,'Value');
@@ -111,15 +115,17 @@ if stabanaly==1 %Linear stability analysis
         
         solver=char(strtrim(solver));
         set(handles.func_prog,'String',['Running: Stability Analysis ',num2str(i)],'ForegroundColor','r')
-        if growth==1
-            h=handles.timestamp;
-            h1=handles.progress;
-            tt=time1;
-            flag=[];
-            eval(['[~,yout2]=',solver,'(@model_gen, 0:0.01:time1, init, options, S1in, D, Y1, kdec1, Y2, kdec2, Y3, kdec3, km1, Ks1, km2, Ks2, km3, Ks3, Ks3c, KI2, gamma0,gamma1,gamma2, S2in, S3in,h,h1,tt,motif,flag);']);
-
-        elseif growth==2
-            [~,yout2]=ode23s(@four_mod2, [0:0.01:time1], init, options, Spin1, D, Yp1, kdecp1, YH1, kdecH1, kmp1, kmH1, Ksxp1, KsxH1, KIH1); %CHANGE FOR ADDITIONAL substrate 3
+   
+        h=handles.timestamp;
+        h1=handles.progress;
+        tt=time1;
+        flag=[];
+        switch growth
+            case 'Monod'
+                eval(['[~,yout2]=',solver,'(@model_gen, 0:0.01:time1, init, options, S1in, D, Y1, kdec1, Y2, kdec2, Y3, kdec3, km1, Ks1, km2, Ks2, km3, Ks3, Ks3c, KI2, gamma0,gamma1,gamma2, S2in, S3in,h,h1,tt,motif,flag);']);
+                
+            case 'Contois'
+                [~,yout2]=ode23s(@four_mod2, [0:0.01:time1], init, options, Spin1, D, Yp1, kdecp1, YH1, kdecH1, kmp1, kmH1, Ksxp1, KsxH1, KIH1); %CHANGE FOR ADDITIONAL substrate 3
         end
         
         %calculate the difference between the trajectories

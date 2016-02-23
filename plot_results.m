@@ -4,7 +4,7 @@
 % Newcastle University, Newcastle-upon-Tyne UK NE1 7RU
 % email address: matthew.wade@ncl.ac.uk; dr.matthewwade@ncl.ac.uk
 % alternative contact: Dr. Nick Parker, nick.parker@ncl.ac.uk
-% Website: SOFTWARE HOSTED SITE
+% Website: https://github.com/MI-SIM/MI-SIM
 % September 2015; Last revision: 05-Jan-2016
 
 yout=handles.yout;

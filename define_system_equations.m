@@ -6,24 +6,14 @@ function [eqs, f1, f2, f3, I2, I3, I4]=define_system_equations(motif,growth)
 % Newcastle University, Newcastle-upon-Tyne UK NE1 7RU
 % email address: matthew.wade@ncl.ac.uk; dr.matthewwade@ncl.ac.uk
 % alternative contact: Dr. Nick Parker, nick.parker@ncl.ac.uk
-% Website: SOFTWARE HOSTED SITE
-% September 2015; Last revision: 04-Jan-2016
+% Website: https://github.com/MI-SIM/MI-SIM
+% September 2015; Last revision: 23-Feb-2016
 
 %Define symbolic variables (S1...X3) and parameters
 syms S1 X1 S2 X2 km1 Ks1 Y1 kdec1 km2 Ks2 Y2 kdec2 KI2 D S1in S2in Ks1a Ks2a S3 X3 Y3 kdec3 Ks3a km3 Ks3 Ks3c S3in gamma0 gamma1 gamma2 
 
-%Define growth functions according to selection growth model (m.wade: to be
-%expanded in future versions))
-if growth==1           %Monod growth function
-    f1=(km1*S1/(Ks1+S1));
-    f2=(km2*S2/(Ks2+S2));
-    f3=(km3*S3/(Ks3+S3));
-    
-elseif growth==2       %Contois growth function
-    f1=(km1*S1/(Ks1a*X1+S1));
-    f2=(km2*S2/(Ks2a*X2+S2));
-    f3=(km3*S3/(Ks3a*X3+S3));
-end
+dse=1;
+growth_functions;
 
 %Define the equations of the system
 switch motif
@@ -88,11 +78,6 @@ switch motif
     case 'ths'
         
         I2=1/(1+S3/KI2);
-        if growth==1
-            f1=f1*(S3/(Ks3c+S3));
-        elseif growth==2
-            f1=f1*(S3/(Ks3c*X3+S3));
-        end
         eq1=D*(S1in-S1)-f1*X1;
         eq2=-D*X1+Y1*f1*X1-kdec1*X1;
         eq3=D*(S2in-S2)+gamma0*(1-Y1)*f1*X1-f2*X2*I2;
@@ -105,4 +90,5 @@ end
 
 %Output system of symbolic equations
 eqs=[eq1,eq2,eq3,eq4,eq5,eq6];
+
 

@@ -22,7 +22,7 @@ function varargout = MI_SIM(varargin)
 
 % Edit the above text to modify the response to help MI_SIM
 
-% Last Modified by GUIDE v2.5 27-Jan-2016 13:32:49
+% Last Modified by GUIDE v2.5 23-Feb-2016 09:37:09
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -57,46 +57,14 @@ cla reset
 xlabel(handles.solutionplot,'Time (days)')
 ylabel(handles.solutionplot,'Concentration (kgCOD m^{-3})')
 
-%Default motif
-set(handles.model_label,'String','4 ODE: Syntrophy');
-set(handles.commensalism,'Checked','off'); set(handles.competition,'Checked','off');
-set(handles.predation,'Checked','off'); set(handles.no_interaction,'Checked','off');
-set(handles.cooperation,'Checked','on'); set(handles.amensalism,'Checked','off'); set(handles.threesp,'Checked','off');
-handles.motif='syn';
 set(handles.twodimplot,'Checked','on'); set(handles.threedimplot,'Checked','off')
 set(handles.timeplot,'Checked','on'); set(handles.phaseplot,'Checked','off'); set(handles.eigplot,'Checked','off')
 set(handles.sol_disp,'String','Display:')
-handles.plotdim='two';
-handles.plotsolution='time';
-handles.growthmodel='Monod';
+
 set(handles.overlay,'enable','off')
-set(handles.s3_check,'value',0,'enable','off')
 
 %reset all of the values
-set(handles.growthmenu,'Value',1);
-set(handles.km1_in,'String',13);
-set(handles.y1_in,'String',0.04);
-set(handles.kdec1_in,'String',0.02);
-set(handles.s1in_in,'String',5);
-set(handles.ki2_in,'String',0.0000035);
-set(handles.ks1_in,'String',0.3);
-set(handles.ks1a_in,'String',3);
-set(handles.ks2a_in,'String',2);
-set(handles.d_in,'String',0.1);
-set(handles.time_in,'String',1000);
-set(handles.s1_init,'String',0.1);
-set(handles.x1_init,'String',0.1);
-set(handles.s2_init,'String',0.1);
-set(handles.x2_init,'String',0.1);
-set(handles.s3_init,'String',0.1);
-set(handles.x3_init,'String',0.1);
-set(handles.fixed_points_s1,'String','-');
-set(handles.fixed_points_x1,'String','-');
-set(handles.fixed_points_s2,'String','-');
-set(handles.fixed_points_x2,'String','-');
-set(handles.fixed_points_s3,'String','-');
-set(handles.fixed_points_x3,'String','-');
-set(handles.fixed_points_stability,'String','-');
+
 set(handles.solver,'Value',3);
 set(handles.abstol,'String','1e-8');
 set(handles.reltol,'String','1e-8');
@@ -111,6 +79,7 @@ set(handles.spmatrix,'Visible','off');
 set(handles.twodphase,'Enable','off'); set(handles.threedphase,'Enable','off')
 set(handles.colormp,'Visible','off');
 set(handles.normeig,'Visible','off','Value',0)
+handles.growthmodel='Monod';
 dir_fig=dir('temp_fig');
 if length(dir_fig)<3
     set(handles.report_menu,'Enable','off')
@@ -123,49 +92,45 @@ else
 end
 handles.yout_phase=[];
 handles.clcyc=1;
-axes(handles.motif_image)
-imshow('motifs_images/syn.png');
 
-%Second organism parameter ON
-set(handles.text14,'Enable','on');set(handles.text15,'Enable','on')
-set(handles.text16,'Enable','on');set(handles.text19,'Enable','on')
-set(handles.km2_in,'Enable','on','String',35);set(handles.y2_in,'Enable','on','String',0.06)
-set(handles.kdec2_in,'Enable','on');set(handles.ks2_in,'Enable','on','String',2.5e-5)
+%List of Existing Growth Models
+Exist_Models=[{'Commensalism'};{'Competition'};{'Predation'};{'No_interaction'};{'Cooperation'};{'Amensalism'};{'Threespecies'}];
+Exist_Gmodels=[{'Monod'};{'Contois'};{'Tessier'};{'Moser'};{'Logistic'};{'Andrews'};{'Thermodynamic'}];
+if ~isempty(varargin)
+    %Check valid model
+    if numel(varargin)==2
+    fndmd=strncmpi(varargin(1),Exist_Models,4); %Check first four letters of model for match
+    fndmg=strncmpi(varargin(2),Exist_Gmodels,3); %Check first three letters of model for match
+    else
+        try
+            fndmd=strncmpi(varargin,Exist_Models,4);
+            fndmg=0;
+        catch
+            fndmg=strncmpi(varargin(2),Exist_Gmodels,3);
+            fndmd=0;
+        end
+    end
+    mdindex=find(fndmd); %Get index
+    mgindex=find(fndmg);
+    if (sum(fndmd)>0)
+        handles.motif_name=Exist_Models{mdindex};
+    else
+        handles.motif_name='Syntrophy';
+    end
 
-%Third organism parameter OFF
-set(handles.text43,'Enable','off');set(handles.text44,'Enable','off')
-set(handles.text45,'Enable','off');set(handles.text47,'Enable','off'); set(handles.text81,'Enable','off')
-set(handles.km3_in,'Enable','off','String',21);set(handles.y3_in,'Enable','off','String',0.04)
-set(handles.kdec3_in,'Enable','off'); set(handles.ks3_in,'Enable','off','String',1e-3)
-set(handles.ks32_in,'Enable','off','String',1e-6);
+    if (sum(fndmg)>0)
+        handles.growthmodel=Exist_Gmodels{mgindex};
+        set(handles.growthmenu,'Value',mgindex);
+    else
+        handles.growthmodel='Monod';
+        set(handles.growthmenu,'Value',1);
+    end
+else
+    handles.motif_name='Syntrophy';
+end
 
-%Gamma values
-set(handles.text42,'Enable','on'); set(handles.text82,'Enable','off')
-set(handles.text83,'Enable','off'); set(handles.gamma0,'Enable','on','String',0.43);
-set(handles.gamma1,'Enable','off','String',0.1429); set(handles.gamma2,'Enable','off','String',0.0769);
+handles=model_sel(handles);
 
-%Equations
-eqtx1='$\frac{dS_1}{dt} = D(S_{1,in} - S_1) - f_1X_1I_2$';
-eqtx2='$\frac{dX_1}{dt} = -DX_1 + Y_1f_1X_1I_2 - k_{dec,1}X_1$';
-eqtx3='$\frac{dS_2}{dt} = -DS_2 + \gamma(1-Y_1)f_1X_1I_2 - f_2X_2$';
-eqtx4='$\frac{dX_2}{dt} = -DX_2 + Y_2f_2X_2 - k_{dec,2}X_2$';
-
-f1tx = '$f_1 = \frac{k_{m,1}S_1}{K_{S,1} + S_1}$';
-f2tx = '$f_2 = \frac{k_{m,2}S_2}{K_{S,2} + S_2}$';
-I2tx = '$I_2 = \frac{1}{1+\frac{S_2}{K_{i,2}}}$';
-
-handles.params_sim=strvcat('S1in','D','km1','Ks1','Y1','km2','Ks2','Y2','kdec1','kdec2','KI2');
-handles.var_names=strvcat('S1','X1','S2','X2');
-handles.simtype='single_p';
-eqtext = strvcat(eqtx1,eqtx2,eqtx3,eqtx4);
-fnctext = strvcat(f1tx,f2tx,I2tx);
-cla(handles.txax)
-axes(handles.txax)
-
-text(0,0.5,eqtext,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
-text(0.7,0.5,fnctext,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
-handles.eqtx=eqtext;
-handles.fnctx=fnctext;
 % Choose default command line output for MI_SIM
 handles.output = hObject;
 
@@ -246,8 +211,7 @@ end
 % --- Executes on selection change in growthmenu.
 function growthmenu_Callback(hObject, eventdata, handles)
 contents = cellstr(get(hObject,'String'));
-growth=contents{get(hObject,'Value')};
-handles.growthmodel=growth;
+handles.growthmodel=contents{get(hObject,'Value')};
 guidata(hObject,handles)
 
 % --- Executes during object creation, after setting all properties.
@@ -607,7 +571,7 @@ multi=get(hObject,'Value');
 function run_Callback(hObject, eventdata, handles)
 
 % Get user input
-growth=get(handles.growthmenu,'Value');
+growth=handles.growthmodel;
 motif=handles.motif;
 
 km1 = str2double(get(handles.km1_in,'String'));
@@ -881,506 +845,66 @@ function models_Callback(hObject, eventdata, handles)
 
 % --------------------------------------------------------------------
 function commensalism_Callback(hObject, eventdata, handles)
-set(handles.model_label,'String','4 ODE: Food Chain');
-set(handles.commensalism,'Checked','on'); set(handles.competition,'Checked','off');
-set(handles.predation,'Checked','off'); set(handles.no_interaction,'Checked','off');
-set(handles.cooperation,'Checked','off'); set(handles.amensalism,'Checked','off'); set(handles.threesp,'Checked','off');
-set(handles.spmatrix,'Visible','off'); axes(handles.spmatrix); cla
-handles.motif='fc';
-axes(handles.motif_image)
-imshow('motifs_images/fc.png');
-set(handles.plot_button,'enable','off')
-set(handles.plot_button2,'enable','off')
-set(handles.s1_check,'value',1,'enable','on'); set(handles.x1_check,'value',1,'enable','on')
-set(handles.s2_check,'value',1,'enable','on'); set(handles.x2_check,'value',1,'enable','on')
-set(handles.s3_check,'value',0,'enable','off'); set(handles.x3_check,'value',0,'enable','off')
-set(handles.s3_init,'enable','off'); set(handles.s3_init_text,'enable','off')
-set(handles.s2_init,'enable','on'); set(handles.x3_init,'enable','off') 
-set(handles.x3_init_text,'enable','off'); set(handles.S2_0,'enable','on')
-set(handles.s2in_in,'enable','off'); set(handles.text55,'enable','off')
-set(handles.s3in_in,'enable','off'); set(handles.text48,'enable','off')
-set(handles.timeplot,'checked','on'); set(handles.phaseplot,'checked','off')
-set(handles.ks32_in,'enable','off','String',1e-6); set(handles.text81,'enable','off')
-set(handles.fixed_points_s1,'String','-'); set(handles.fixed_points_x1,'String','-')
-set(handles.fixed_points_s2,'String','-'); set(handles.fixed_points_x2,'String','-')
-set(handles.fixed_points_s3,'String','-');
-
-set(handles.text14,'Enable','on');set(handles.text15,'Enable','on')
-set(handles.text16,'Enable','on');set(handles.text19,'Enable','on')
-set(handles.km2_in,'Enable','on','String',35);set(handles.y2_in,'Enable','on','String',0.06)
-set(handles.kdec2_in,'Enable','on');set(handles.ks2_in,'Enable','on','String',2.5e-5)
-
-set(handles.text43,'Enable','off');set(handles.text44,'Enable','off')
-set(handles.text45,'Enable','off');set(handles.text47,'Enable','off')
-set(handles.km3_in,'Enable','off');set(handles.y3_in,'Enable','off')
-set(handles.kdec3_in,'Enable','off');set(handles.ks3_in,'Enable','off')
-set(handles.gamma0,'Enable','on','String',0.43); set(handles.gamma1,'Enable','off')
-set(handles.gamma2,'Enable','off'); set(handles.text82,'Enable','off')
-set(handles.text83,'Enable','off')
-
-handles.plotsolution='time'; handles.plotdim='two';
-
-%Equations
-eqtx1='$\frac{dS_1}{dt} = D(S_{1,in} - S_1) - f_1X_1$';
-eqtx2='$\frac{dX_1}{dt} = -DX_1 + Y_1f_1X_1 - k_{dec,1}X_1$';
-eqtx3='$\frac{dS_2}{dt} = -DS_2 + \gamma(1-Y_1)f_1X_1 - f_2X_2$';
-eqtx4='$\frac{dX_2}{dt} = -DX_2 + Y_2f_2X_2 - k_{dec,2}X_2$';
-
-%Functions depend on growth model
-switch handles.growthmodel
-    case 'Monod'
-        f1tx = '$f_1 = \frac{k_{m,1}S_1}{K_{S,1} + S_1}$';
-        f2tx = '$f_2 = \frac{k_{m,2}S_2}{K_{S,2} + S_2}$';
-    case 'Contois'
-        f1tx = '$f_1 = \frac{k_{m,1}S_1}{K_{S,1}X_1 + S_1}$';
-        f2tx = '$f_2 = \frac{k_{m,2}S_2}{K_{S,2}X_2 + S_2}$';
-end
-
-handles.params_sim=strvcat('S1in','D','km1','KS1','Y1','km2','KS2','Y2','kdec1','kdec2');
-handles.var_names=strvcat('S1','X1','S2','X2');
-eqtext = strvcat(eqtx1,eqtx2,eqtx3,eqtx4);
-fnctext = strvcat(f1tx,f2tx);
-cla(handles.txax)
-axes(handles.txax)
-
-text(0,0.5,eqtext,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
-text(0.7,0.5,fnctext,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
-handles.eqtx=eqtext;
-handles.fnctx=fnctext;
+handles.motif_name='Commensalism';
+contents = cellstr(get(handles.growthmenu,'String'));
+handles.growthmodel=contents{get(handles.growthmenu,'Value')};
+handles=model_sel(handles);
 guidata(hObject,handles);
 
 % --------------------------------------------------------------------
 function competition_Callback(hObject, eventdata, handles)
-set(handles.model_label,'String','3 ODE: Substrate Competition');
-set(handles.commensalism,'Checked','off'); set(handles.competition,'Checked','on');
-set(handles.predation,'Checked','off'); set(handles.no_interaction,'Checked','off');
-set(handles.cooperation,'Checked','off'); set(handles.amensalism,'Checked','off'); set(handles.threesp,'Checked','off');
-set(handles.spmatrix,'Visible','off'); axes(handles.spmatrix); cla
-handles.motif='sc';
-axes(handles.motif_image)
-imshow('motifs_images/sc.png');
-set(handles.plot_button,'enable','off')
-set(handles.plot_button2,'enable','off')
-set(handles.s1_check,'value',1,'enable','on'); set(handles.x1_check,'value',1,'enable','on')
-set(handles.s2_check,'value',0,'enable','off'); set(handles.x2_check,'value',1,'enable','on')
-set(handles.s3_check,'value',0,'enable','off'); set(handles.x3_check,'value',0,'enable','off')
-set(handles.s3_init,'enable','off'); set(handles.s3_init_text,'enable','off')
-set(handles.s2_init,'enable','off');set(handles.x3_init,'enable','off') 
-set(handles.x3_init_text,'enable','off'); set(handles.S2_0,'enable','off')
-set(handles.s2in_in,'enable','off'); set(handles.text55,'enable','off')
-set(handles.s3in_in,'enable','off'); set(handles.text48,'enable','off')
-set(handles.ks32_in,'enable','off','String',1e-6); set(handles.text81,'enable','off')
-set(handles.timeplot,'checked','on'); set(handles.phaseplot,'checked','off');
-set(handles.fixed_points_s1,'String','-'); set(handles.fixed_points_x1,'String','-');
-set(handles.fixed_points_s2,'String','-'); set(handles.fixed_points_x2,'String','-');
-set(handles.fixed_points_s3,'String','-');
-handles.plotsolution='time'; handles.plotdim='two';
+handles.motif_name='Competition';
+contents = cellstr(get(handles.growthmenu,'String'));
+handles.growthmodel=contents{get(handles.growthmenu,'Value')};
 
-set(handles.text14,'Enable','on');set(handles.text15,'Enable','on')
-set(handles.text16,'Enable','on');set(handles.text19,'Enable','on')
-set(handles.km2_in,'Enable','on','String',35);set(handles.y2_in,'Enable','on','String',0.06)
-set(handles.kdec2_in,'Enable','on');set(handles.ks2_in,'Enable','on','String',2.5e-5)
-
-set(handles.text43,'Enable','off');set(handles.text44,'Enable','off')
-set(handles.text45,'Enable','off');set(handles.text47,'Enable','off')
-set(handles.km3_in,'Enable','off');set(handles.y3_in,'Enable','off')
-set(handles.kdec3_in,'Enable','off');set(handles.ks3_in,'Enable','off')
-set(handles.gamma0,'Enable','on','String',0.43); set(handles.gamma1,'Enable','off')
-set(handles.gamma2,'Enable','off'); set(handles.text82,'Enable','off')
-set(handles.text83,'Enable','off')
-
-axes(handles.trajectoryplot)
-colorbar off
-%Equations
-eqtx1='$\frac{dS_1}{dt} = D(S_{1,in} - S_1) - f_1X_1 - f_2X_2$';
-eqtx2='$\frac{dX_1}{dt} = -DX_1 + Y_1f_1X_1 - k_{dec,1}X_1$';
-eqtx3='$\frac{dX_2}{dt} = -DX_2 + Y_2f_2X_2 - k_{dec,2}X_2$';
-
-switch handles.growthmodel
-    case 'Monod'
-        f1tx = '$f_1 = \frac{k_{m,1}S_1}{K_{S,1} + S_1}$';
-        f2tx = '$f_2 = \frac{k_{m,2}S_2}{K_{S,2} + S_2}$';
-    case 'Contois'
-        f1tx = '$f_1 = \frac{k_{m,1}S_1}{K_{S,1}X_1 + S_1}$';
-        f2tx = '$f_2 = \frac{k_{m,2}S_2}{K_{S,2}X_2 + S_2}$';
-end
-
-handles.params_sim=strvcat('S1in','D','km1','Ks1','Y1','km2','Ks2','Y2','kdec1','kdec2');
-handles.var_names=strvcat('S1','X1','X2');
-eqtext = strvcat(eqtx1,eqtx2,eqtx3);
-fnctext = strvcat(f1tx,f2tx);
-cla(handles.txax)
-axes(handles.txax)
-
-text(0,0.5,eqtext,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
-text(0.7,0.5,fnctext,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
-handles.eqtx=eqtext;
-handles.fnctx=fnctext;
-
+handles=model_sel(handles);
 guidata(hObject,handles);
 
 % --------------------------------------------------------------------
 function predation_Callback(hObject, eventdata, handles)
-set(handles.model_label,'String','5 ODE: Food Chain with Waste Product Inhibition');
-set(handles.commensalism,'Checked','off'); set(handles.competition,'Checked','off');
-set(handles.predation,'Checked','on'); set(handles.no_interaction,'Checked','off');
-set(handles.cooperation,'Checked','off'); set(handles.amensalism,'Checked','off'); set(handles.threesp,'Checked','off');
-set(handles.spmatrix,'Visible','off'); axes(handles.spmatrix); cla
-handles.motif='fci';
-axes(handles.motif_image)
-imshow('motifs_images/fcpi.png');
-set(handles.plot_button,'enable','off')
-set(handles.plot_button2,'enable','off')
-set(handles.s1_check,'value',1,'enable','on'); set(handles.x1_check,'value',1,'enable','on')
-set(handles.s2_check,'value',1,'enable','on'); set(handles.x2_check,'value',1,'enable','on')
-set(handles.s3_check,'value',1,'enable','on'); set(handles.x3_check,'value',0,'enable','off')
-set(handles.s3_init,'enable','on'); set(handles.s3_init_text,'enable','on')
-set(handles.s2_init,'enable','on');set(handles.x3_init,'enable','off') 
-set(handles.x3_init_text,'enable','off'); set(handles.S2_0,'enable','on')
-set(handles.s2in_in,'enable','off'); set(handles.text55,'enable','off')
-set(handles.s3in_in,'enable','off'); set(handles.text48,'enable','off')
-set(handles.ks32_in,'enable','off','String',1e-6); set(handles.text81,'enable','off')
-set(handles.timeplot,'checked','on'); set(handles.phaseplot,'checked','off');
-set(handles.fixed_points_s1,'String','-'); set(handles.fixed_points_x1,'String','-');
-set(handles.fixed_points_s2,'String','-'); set(handles.fixed_points_x2,'String','-');
-set(handles.fixed_points_s3,'String','-');
-handles.plotsolution='time'; handles.plotdim='two';
+handles.motif_name='Predation';
+contents = cellstr(get(handles.growthmenu,'String'));
+handles.growthmodel=contents{get(handles.growthmenu,'Value')};
 
-set(handles.text14,'Enable','on');set(handles.text15,'Enable','on')
-set(handles.text16,'Enable','on');set(handles.text19,'Enable','on')
-set(handles.km2_in,'Enable','on','String',35);set(handles.y2_in,'Enable','on','String',0.06)
-set(handles.kdec2_in,'Enable','on');set(handles.ks2_in,'Enable','on','String',2.5e-5)
-
-set(handles.text43,'Enable','off');set(handles.text44,'Enable','off')
-set(handles.text45,'Enable','off');set(handles.text47,'Enable','off')
-set(handles.km3_in,'Enable','off');set(handles.y3_in,'Enable','off')
-set(handles.kdec3_in,'Enable','off');set(handles.ks3_in,'Enable','off')
-set(handles.gamma0,'Enable','on','String',0.43); set(handles.gamma1,'Enable','off')
-set(handles.gamma2,'Enable','off'); set(handles.text82,'Enable','off')
-set(handles.text83,'Enable','off')
-
-axes(handles.trajectoryplot)
-colorbar off
-%Equations
-eqtx1='$\frac{dS_1}{dt} = D(S_{1,in} - S_1) - f_1X_1I_3$';
-eqtx2='$\frac{dX_1}{dt} = -DX_1 + Y_1f_1X_1I_3 - k_{dec,1}X_1$';
-eqtx3='$\frac{dS_2}{dt} = -DS_2 + \gamma(1-Y_1)f_1X_1I_3 - f_2X_2$';
-eqtx4='$\frac{dX_2}{dt} = -DX_2 + Y_2f_2X_2 - k_{dec,2}X_2$';
-eqtx5='$\frac{dS_3}{dt} = -DS_3 + f_2X_2$';
-I3tx = '$I_3 = \frac{1}{1+\frac{S_3}{K_{i,3}}}$';
-%Functions depend on growth model
-switch handles.growthmodel
-    case 'Monod'
-        f1tx = '$f_1 = \frac{k_{m,1}S_1}{K_{S,1} + S_1}$';
-        f2tx = '$f_2 = \frac{k_{m,2}S_2}{K_{S,2} + S_2}$';
-        
-    case 'Contois'
-        f1tx = '$f_1 = \frac{k_{m,1}S_1}{K_{S,1}X_1 + S_1}$';
-        f2tx = '$f_2 = \frac{k_{m,2}S_2}{K_{S,2}X_2 + S_2}$';
-end
-
-handles.params_sim=strvcat('S1in','D','km1','Ks1','Y1','km2','Ks2','Y2','kdec1','kdec2','KI3');
-handles.var_names=strvcat('S1','X1','S2','X2','S3');
-eqtext = strvcat(eqtx1,eqtx2,eqtx3,eqtx4,eqtx5);
-fnctext = strvcat(f1tx,f2tx,I3tx);
-cla(handles.txax)
-axes(handles.txax)
-
-text(0,0.5,eqtext,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
-text(0.7,0.5,fnctext,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
-handles.eqtx=eqtext;
-handles.fnctx=fnctext;
-
-guidata(hObject,handles)
+handles=model_sel(handles);
+guidata(hObject,handles);
 
 % --------------------------------------------------------------------
 function no_interaction_Callback(hObject, eventdata, handles)
-set(handles.model_label,'String','4 ODE: No Common Metabolites');
-set(handles.commensalism,'Checked','off'); set(handles.competition,'Checked','off');
-set(handles.predation,'Checked','off'); set(handles.no_interaction,'Checked','on');
-set(handles.cooperation,'Checked','off'); set(handles.amensalism,'Checked','off'); set(handles.threesp,'Checked','off');
-set(handles.spmatrix,'Visible','off'); axes(handles.spmatrix); cla
-handles.motif='ni';
-axes(handles.motif_image)
-imshow('motifs_images/ni.png');
-set(handles.plot_button,'enable','off')
-set(handles.plot_button2,'enable','off')
-set(handles.s1_check,'value',1,'enable','on'); set(handles.x1_check,'value',1,'enable','on')
-set(handles.s2_check,'value',1,'enable','on'); set(handles.x2_check,'value',1,'enable','on')
-set(handles.s3_check,'value',0,'enable','off'); set(handles.x3_check,'value',0,'enable','off')
-set(handles.s3_init,'enable','off'); set(handles.s3_init_text,'enable','off')
-set(handles.s2_init,'enable','on');set(handles.x3_init,'enable','off') 
-set(handles.x3_init_text,'enable','off'); set(handles.S2_0,'enable','on')
-set(handles.s2in_in,'enable','on'); set(handles.text55,'enable','on')
-set(handles.s3in_in,'enable','off'); set(handles.text48,'enable','off')
-set(handles.ks32_in,'enable','off','String',1e-6); set(handles.text81,'enable','off')
-set(handles.timeplot,'checked','on'); set(handles.phaseplot,'checked','off');
-set(handles.fixed_points_s1,'String','-'); set(handles.fixed_points_x1,'String','-');
-set(handles.fixed_points_s2,'String','-'); set(handles.fixed_points_x2,'String','-');
-set(handles.fixed_points_s3,'String','-');
-handles.plotsolution='time'; handles.plotdim='two';
+handles.motif_name='No_interaction';
+contents = cellstr(get(handles.growthmenu,'String'));
+handles.growthmodel=contents{get(handles.growthmenu,'Value')};
 
-set(handles.text14,'Enable','on');set(handles.text15,'Enable','on')
-set(handles.text16,'Enable','on');set(handles.text19,'Enable','on')
-set(handles.km2_in,'Enable','on','String',35);set(handles.y2_in,'Enable','on','String',0.06)
-set(handles.kdec2_in,'Enable','on');set(handles.ks2_in,'Enable','on','String',2.5e-5)
+handles=model_sel(handles);
 
-set(handles.text43,'Enable','off');set(handles.text44,'Enable','off')
-set(handles.text45,'Enable','off');set(handles.text47,'Enable','off')
-set(handles.km3_in,'Enable','off');set(handles.y3_in,'Enable','off')
-set(handles.kdec3_in,'Enable','off');set(handles.ks3_in,'Enable','off')
-set(handles.gamma0,'Enable','on','String',0.43); set(handles.gamma1,'Enable','off')
-set(handles.gamma2,'Enable','off'); set(handles.text82,'Enable','off')
-set(handles.text83,'Enable','off')
-
-axes(handles.trajectoryplot)
-colorbar off
-%Equations
-eqtx1='$\frac{dS_1}{dt} = D(S_{1,in} - S_1) - f_1X_1$';
-eqtx2='$\frac{dX_1}{dt} = -DX_1 + Y_1f_1X_1 - k_{dec,1}X_1$';
-eqtx3='$\frac{dS_2}{dt} = D(S_{2,in} - S_2) - f_2X_2$';
-eqtx4='$\frac{dX_2}{dt} = -DX_2 + Y_2f_2X_2 - k_{dec,2}X_2$';
-
-switch handles.growthmodel
-    case 'Monod'
-        f1tx = '$f_1 = \frac{k_{m,1}S_1}{K_{S,1} + S_1}$';
-        f2tx = '$f_2 = \frac{k_{m,2}S_2}{K_{S,2} + S_2}$';
-    case 'Contois'
-        f1tx = '$f_1 = \frac{k_{m,1}S_1}{K_{S,1}X_1 + S_1}$';
-        f2tx = '$f_2 = \frac{k_{m,2}S_2}{K_{S,2}X_2 + S_2}$';
-end
-
-handles.params_sim=strvcat('S1in','D','S2in','km1','Ks1','Y1','km2','Ks2','Y2','kdec1','kdec2');
-handles.var_names=strvcat('S1','X1','S2','X2');
-eqtext = strvcat(eqtx1,eqtx2,eqtx3,eqtx4);
-fnctext = strvcat(f1tx,f2tx);
-cla(handles.txax)
-axes(handles.txax)
-
-text(0,0.5,eqtext,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
-text(0.7,0.5,fnctext,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
-handles.eqtx=eqtext;
-handles.fnctx=fnctext;
 guidata(hObject,handles)
 
 % --------------------------------------------------------------------
 function cooperation_Callback(hObject, eventdata, handles)
-set(handles.model_label,'String','4 ODE: Syntrophy');
-set(handles.commensalism,'Checked','off'); set(handles.competition,'Checked','off');
-set(handles.predation,'Checked','off'); set(handles.no_interaction,'Checked','off');
-set(handles.cooperation,'Checked','on'); set(handles.amensalism,'Checked','off'); set(handles.threesp,'Checked','off');
-set(handles.spmatrix,'Visible','off'); axes(handles.spmatrix); cla
-handles.motif='syn';
-axes(handles.motif_image)
-imshow('motifs_images/syn.png');
-set(handles.plot_button,'enable','off')
-set(handles.plot_button2,'enable','off')
-set(handles.s1_check,'value',1,'enable','on'); set(handles.x1_check,'value',1,'enable','on')
-set(handles.s2_check,'value',1,'enable','on'); set(handles.x2_check,'value',1,'enable','on')
-set(handles.s3_check,'value',0,'enable','off'); set(handles.x3_check,'value',0,'enable','off')
-set(handles.s3_init,'enable','off'); set(handles.s3_init_text,'enable','off')
-set(handles.s2_init,'enable','on');set(handles.x3_init,'enable','off') 
-set(handles.x3_init_text,'enable','off'); set(handles.S2_0,'enable','on')
-set(handles.s2in_in,'enable','off'); set(handles.text55,'enable','off')
-set(handles.s3in_in,'enable','off'); set(handles.text48,'enable','off')
-set(handles.ks32_in,'enable','off','String',1e-6); set(handles.text81,'enable','off')
-set(handles.timeplot,'checked','on'); set(handles.phaseplot,'checked','off');
-set(handles.fixed_points_s1,'String','-'); set(handles.fixed_points_x1,'String','-');
-set(handles.fixed_points_s2,'String','-'); set(handles.fixed_points_x2,'String','-');
-set(handles.fixed_points_s3,'String','-');
-handles.plotsolution='time'; handles.plotdim='two';
+handles.motif_name='Cooperation';
+contents = cellstr(get(handles.growthmenu,'String'));
+handles.growthmodel=contents{get(handles.growthmenu,'Value')};
 
-set(handles.text14,'Enable','on');set(handles.text15,'Enable','on')
-set(handles.text16,'Enable','on');set(handles.text19,'Enable','on')
-set(handles.km2_in,'Enable','on','String',35);set(handles.y2_in,'Enable','on','String',0.06)
-set(handles.kdec2_in,'Enable','on');set(handles.ks2_in,'Enable','on','String',2.5e-5)
+handles=model_sel(handles);
 
-set(handles.text43,'Enable','off');set(handles.text44,'Enable','off')
-set(handles.text45,'Enable','off');set(handles.text47,'Enable','off')
-set(handles.km3_in,'Enable','off');set(handles.y3_in,'Enable','off')
-set(handles.kdec3_in,'Enable','off');set(handles.ks3_in,'Enable','off')
-set(handles.gamma0,'Enable','on','String',0.43); set(handles.gamma1,'Enable','off')
-set(handles.gamma2,'Enable','off'); set(handles.text82,'Enable','off')
-set(handles.text83,'Enable','off')
-
-axes(handles.trajectoryplot)
-colorbar off
-%Equations
-eqtx1='$\frac{dS_1}{dt} = D(S_{1,in} - S_1) - f_1X_1I_2$';
-eqtx2='$\frac{dX_1}{dt} = -DX_1 + Y_1f_1X_1I_2 - k_{dec,1}X_1$';
-eqtx3='$\frac{dS_2}{dt} = -DS_2 + \gamma(1-Y_1)f_1X_1I_2 - f_2X_2$';
-eqtx4='$\frac{dX_2}{dt} = -DX_2 + Y_2f_2X_2 - k_{dec,2}X_2$';
-I2tx = '$I_2 = \frac{1}{1+\frac{S_2}{K_{i,2}}}$';
-
-switch handles.growthmodel
-    case 'Monod'
-        f1tx = '$f_1 = \frac{k_{m,1}S_1}{K_{S,1} + S_1}$';
-        f2tx = '$f_2 = \frac{k_{m,2}S_2}{K_{S,2} + S_2}$';
-    case 'Contois'
-        f1tx = '$f_1 = \frac{k_{m,1}S_1}{K_{S,1}X_1 + S_1}$';
-        f2tx = '$f_2 = \frac{k_{m,2}S_2}{K_{S,2}X_2 + S_2}$';
-end
-
-handles.params_sim=strvcat('S1in','D','km1','Ks1','Y1','km2','Ks2','Y2','kdec1','kdec2','KI2');
-handles.var_names=strvcat('S1','X1','S2','X2');
-eqtext = strvcat(eqtx1,eqtx2,eqtx3,eqtx4);
-fnctext = strvcat(f1tx,f2tx,I2tx);
-cla(handles.txax)
-axes(handles.txax)
-
-text(0,0.5,eqtext,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
-text(0.7,0.5,fnctext,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
-handles.eqtx=eqtext;
-handles.fnctx=fnctext;
 guidata(hObject,handles)
 
 % --------------------------------------------------------------------
 function amensalism_Callback(hObject, eventdata, handles)
-set(handles.model_label,'String','5 ODE: Waste Product Inhibition');
-set(handles.commensalism,'Checked','off'); set(handles.competition,'Checked','off');
-set(handles.predation,'Checked','off'); set(handles.no_interaction,'Checked','off');
-set(handles.cooperation,'Checked','off'); set(handles.amensalism,'Checked','on'); set(handles.threesp,'Checked','off');
-set(handles.spmatrix,'Visible','off'); axes(handles.spmatrix); cla
-handles.motif='pi';
-axes(handles.motif_image)
-imshow('motifs_images/wpi.png');
-set(handles.plot_button,'enable','off')
-set(handles.plot_button2,'enable','off')
-set(handles.s1_check,'value',1,'enable','on'); set(handles.x1_check,'value',1,'enable','on')
-set(handles.s2_check,'value',1,'enable','on'); set(handles.x2_check,'value',1,'enable','on')
-set(handles.s3_check,'value',1,'enable','on'); set(handles.x3_check,'value',0,'enable','off')
-set(handles.s3_init,'enable','on'); set(handles.s3_init_text,'enable','on')
-set(handles.s2_init,'enable','on'); set(handles.x3_init,'enable','off') 
-set(handles.x3_init_text,'enable','off'); set(handles.S2_0,'enable','on')
-set(handles.s2in_in,'enable','off'); set(handles.text55,'enable','off')
-set(handles.s3in_in,'enable','on'); set(handles.text48,'enable','on')
-set(handles.ks32_in,'enable','off','String',1e-6); set(handles.text81,'enable','off')
-set(handles.timeplot,'checked','on'); set(handles.phaseplot,'checked','off');
-set(handles.fixed_points_s1,'String','-'); set(handles.fixed_points_x1,'String','-');
-set(handles.fixed_points_s2,'String','-'); set(handles.fixed_points_x2,'String','-');
-set(handles.fixed_points_s3,'String','-');
-handles.plotsolution='time'; handles.plotdim='two';
+handles.motif_name='Amensalism';
+contents = cellstr(get(handles.growthmenu,'String'));
+handles.growthmodel=contents{get(handles.growthmenu,'Value')};
 
-set(handles.text14,'Enable','off');set(handles.text15,'Enable','off')
-set(handles.text16,'Enable','off');set(handles.text19,'Enable','off')
-set(handles.km2_in,'Enable','off');set(handles.y2_in,'Enable','off')
-set(handles.kdec2_in,'Enable','off');set(handles.ks2_in,'Enable','off')
-
-set(handles.text43,'Enable','on');set(handles.text44,'Enable','on')
-set(handles.text45,'Enable','on');set(handles.text47,'Enable','on')
-set(handles.km3_in,'Enable','on','Value',21);set(handles.y3_in,'Enable','on','String',0.04)
-set(handles.kdec3_in,'Enable','on');set(handles.ks3_in,'Enable','on','String',1e-3)
-set(handles.gamma0,'Enable','on','String',0.43); set(handles.gamma1,'Enable','off')
-set(handles.gamma2,'Enable','off'); set(handles.text82,'Enable','off')
-set(handles.text83,'Enable','off')
-
-axes(handles.trajectoryplot)
-colorbar off
-%Equations
-eqtx1='$\frac{dS_1}{dt} = D(S_{1,in} - S_1) - f_1X_1$';
-eqtx2='$\frac{dX_1}{dt} = -DX_1 + Y_1f_1X_1 - k_{dec,1}X_1$';
-eqtx3='$\frac{dS_2}{dt} = -DS_2 + \gamma(1-Y_1)f_1X_1$';
-eqtx4='$\frac{dX_2}{dt} = -DX_2 + Y_3f_3X_2I_2 - k_{dec,3}X_2$';
-eqtx5='$\frac{dS_3}{dt} = D(S_{3,in}-S_3) - f_3X_2I_2$';
-I3tx = '$I_2 = \frac{1}{1+\frac{S_2}{K_{i,2}}}$';
-
-switch handles.growthmodel
-    case 'Monod'
-        f1tx = '$f_1 = \frac{k_{m,1}S_1}{K_{S,1} + S_1}$';
-        f2tx = '$f_3 = \frac{k_{m,3}S_3}{K_{S,3} + S_3}$';
-    case 'Contois'
-        f1tx = '$f_1 = \frac{k_{m,1}S_1}{K_{S,1}X_1 + S_1}$';
-        f2tx = '$f_3 = \frac{k_{m,3}S_3}{K_{S,3}X_3 + S_3}$';
-end
-
-
-handles.params_sim=strvcat('S1in','D','S3in','km1','Ks1','Y1','km3','Ks3','Y3','kdec1','kdec2','KI2');
-handles.var_names=strvcat('S1','X1','S2','X2','S3');
-eqtext = strvcat(eqtx1,eqtx2,eqtx3,eqtx4,eqtx5);
-fnctext = strvcat(f1tx,f2tx,I3tx);
-cla(handles.txax)
-axes(handles.txax)
-
-text(0,0.5,eqtext,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
-text(0.7,0.5,fnctext,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
-handles.eqtx=eqtext;
-handles.fnctx=fnctext;
+handles=model_sel(handles);
 guidata(hObject,handles)
 
 % --------------------------------------------------------------------
 function threesp_Callback(hObject, eventdata, handles)
-set(handles.model_label,'String','6 ODE: 3 species food-web');
-set(handles.commensalism,'Checked','off'); set(handles.competition,'Checked','off');
-set(handles.predation,'Checked','off'); set(handles.no_interaction,'Checked','off');
-set(handles.cooperation,'Checked','off'); set(handles.amensalism,'Checked','off'); set(handles.threesp,'Checked','on');
-set(handles.spmatrix,'Visible','off'); axes(handles.spmatrix); cla
-handles.motif='ths';
-axes(handles.motif_image)
-imshow('motifs_images/ths.png');
-set(handles.plot_button,'enable','off')
-set(handles.plot_button2,'enable','off')
-set(handles.s1_check,'value',1,'enable','on'); set(handles.x1_check,'value',1,'enable','on')
-set(handles.s2_check,'value',1,'enable','on'); set(handles.x2_check,'value',1,'enable','on')
-set(handles.s3_check,'value',1,'enable','on'); set(handles.x3_check,'value',1,'enable','on')
-set(handles.s3_init,'enable','on'); set(handles.s3_init_text,'enable','on')
-set(handles.s2_init,'enable','on'); set(handles.x3_init,'enable','on') 
-set(handles.x3_init_text,'enable','on'); set(handles.S2_0,'enable','on')
-set(handles.ks2_in,'enable','on','String',0.302); set(handles.ks1_in,'String',5.2e-5)
-set(handles.s2in_in,'enable','on','String',0); set(handles.text55,'enable','on')
-set(handles.s3in_in,'enable','on','String',0); set(handles.text48,'enable','on')
-set(handles.km3_in,'enable','on','String',35); set(handles.text43,'enable','on')
-set(handles.y3_in,'enable','on','String',0.06); set(handles.text44,'enable','on')
-set(handles.kdec3_in,'enable','on'); set(handles.text45,'enable','on')
-set(handles.ks3_in,'enable','on','String',2.5e-5); set(handles.text47,'enable','on')
-set(handles.ks32_in,'enable','on','String',1e-6); set(handles.text81,'enable','on')
-set(handles.gamma0,'String',1.0769); set(handles.gamma1,'enable','on','String',0.1429) 
-set(handles.gamma2,'enable','on','String',0.0769); set(handles.text82,'enable','on')
-set(handles.text83,'enable','on');
+handles.motif_name='Threespecies';
+contents = cellstr(get(handles.growthmenu,'String'));
+handles.growthmodel=contents{get(handles.growthmenu,'Value')};
 
-set(handles.timeplot,'checked','on'); set(handles.phaseplot,'checked','off')
-set(handles.fixed_points_s1,'String','-'); set(handles.fixed_points_x1,'String','-')
-set(handles.fixed_points_s2,'String','-'); set(handles.fixed_points_x2,'String','-')
-set(handles.fixed_points_s3,'String','-'); set(handles.fixed_points_x3,'String','-')
-handles.plotsolution='time'; handles.plotdim='two';
-
-set(handles.text14,'Enable','on');set(handles.text15,'Enable','on')
-set(handles.text16,'Enable','on');set(handles.text19,'Enable','on'); set(handles.text55,'Enable','on')
-set(handles.km2_in,'Enable','on','Value',26);set(handles.y2_in,'Enable','on','String',0.04)
-set(handles.kdec2_in,'Enable','on');
-
-axes(handles.trajectoryplot)
-colorbar off
-%Equations
-eqtx1='$\frac{dS_1}{dt} = D(S_{1,in} - S_1) - f_1X_1$';
-eqtx2='$\frac{dX_1}{dt} = -DX_1 + Y_1f_1X_1 - k_{dec,1}X_1$';
-eqtx3='$\frac{dS_2}{dt} = D(S_{2,in} - S_2) + \gamma_0(1-Y_1)f_1X_1 - f_2X_2I_2$';
-eqtx4='$\frac{dX_2}{dt} = -DX_2 + Y_2f_2X_2I_2 - k_{dec,2}X_2$';
-eqtx5='$\frac{dS_3}{dt} = D(S_{3,in}-S_3) + \gamma_1(1-Y_2)f_2X_2I_2 - f_3X_3 - \gamma_2f_1X_1$';
-eqtx6='$\frac{dX_3}{dt} = -DX_3 + Y_3f_3X_3 - k_{dec,3}X_3$';
-I2tx = '$I_2 = \frac{1}{1+\frac{S_3}{K_{i,2}}}$';
-
-switch handles.growthmodel
-    case 'Monod'
-        f1tx = '$f_1 = \frac{k_{m,1}S_3}{K_{S,3c} + S_3}\frac{S_1}{K_{S,1} + S_1}$';
-        f2tx = '$f_2 = \frac{k_{m,2}S_2}{K_{S,2} + S_2}$';
-        f3tx = '$f_3 = \frac{k_{m,3}S_3}{K_{S,3} + S_3}$';
-    case 'Contois'
-        f1tx = '$f_1 = \frac{k_{m,1}S_3}{K_{S,3c}X_3 + S_3}\frac{S_1}{K_{S,1co}X_1 + S_1}$';
-        f2tx = '$f_2 = \frac{k_{m,2}S_2}{K_{S,2co}X_2 + S_2}$';
-        f3tx = '$f_3 = \frac{k_{m,3}S_3}{K_{S,3co}X_3 + S_3}$';
-end
-
-handles.params_sim=strvcat('S1in','D','S3in','S2in','km1','Ks1','Y1','km2','Ks2','Y2','km3','Ks3','Y3','kdec1','kdec2','kdec3','Ks3c','KI2');
-handles.var_names=strvcat('S1','X1','S2','X2','S3','X3');
-eqtext = strvcat(eqtx1,eqtx2,eqtx3,eqtx4,eqtx5,eqtx6);
-fnctext = strvcat(f1tx,f2tx,f3tx,I2tx);
-cla(handles.txax)
-axes(handles.txax)
-
-text(0,0.45,eqtext,'interpreter','latex','horiz','left','vert','middle','fontsize',12)
-text(0.81,0.5,fnctext,'interpreter','latex','horiz','left','vert','middle','fontsize',12)
-handles.eqtx=eqtext;
-handles.fnctx=fnctext;
+handles=model_sel(handles);
 guidata(hObject,handles)
 
 
@@ -1955,9 +1479,4 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
-% --- Executes when figure1 is resized.
 function figure1_SizeChangedFcn(hObject, eventdata, handles)
-% hObject    handle to figure1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)

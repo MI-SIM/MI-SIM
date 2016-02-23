@@ -5,7 +5,7 @@ function dP=four_mod(time, init, S1in, D, Y1, kdec1, Y2, kdec2, Y3, kdec3, km1, 
 % Newcastle University, Newcastle-upon-Tyne UK NE1 7RU
 % email address: matthew.wade@ncl.ac.uk; dr.matthewwade@ncl.ac.uk
 % alternative contact: Dr. Nick Parker, nick.parker@ncl.ac.uk
-% Website: SOFTWARE HOSTED SITE
+% Website: https://github.com/MI-SIM/MI-SIM
 % September 2015; Last revision: 04-Jan-2016
 
 
@@ -38,8 +38,7 @@ else
     TSMP = sprintf('%02d:%02d:%02d ',c(4),c(5),round(c(6)));
     set(handles.timestamp,'String',['Time: ',TSMP])
 end
-%allow for object to update
-pause(0.000000000000000001)
+drawnow
 
 %Take the substrate and biomass values at each time point
 outsiz=length(init);
