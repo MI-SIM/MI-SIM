@@ -440,9 +440,9 @@ for k=1:size(fixed_numerical,1)
     
 end
 
-%Save Report
-% newfig_l=figure;
-% axesobject_l=copyobj(handles.trajectoryplot,newfig_l);
-% title('Basin of Attraction')
-% export_fig temp_fig/ExpandReport -pdf -r600 -append
-% close(newfig_l)
+%Save Figure to temp_fig
+fig_name=['temp_fig/',datestr(datetime),'_boa_plot.pdf'];
+newfig_a=figure;
+axesobject_a=copyobj(handles.trajectoryplot,newfig_a);
+hgexport(handles.trajectoryplot, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
+close(newfig_a)

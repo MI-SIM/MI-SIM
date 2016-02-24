@@ -1,4 +1,12 @@
 function motif_out=model_sel(handles)
+%model_sel - initialisation and parameterisation of motifs
+%
+% Author: Dr. Matthew Wade, School of Civil Engineering & Geosciences
+% Newcastle University, Newcastle-upon-Tyne UK NE1 7RU
+% email address: matthew.wade@ncl.ac.uk; dr.matthewwade@ncl.ac.uk
+% alternative contact: Dr. Nick Parker, nick.parker@ncl.ac.uk
+% Website: https://github.com/MI-SIM/MI-SIM
+% February 2015; Last revision: 24-Feb-2016
 
 switch handles.motif_name
     case 'Commensalism'

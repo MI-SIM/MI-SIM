@@ -1320,13 +1320,12 @@ switch handles.simtype
             
         end
         
-        %Save Report
-        %         newfig_g=figure;
-        %         axesobject_g=copyobj(handles.trajectoryplot,newfig_g);
-        %         title('Operating Plot')
-        %         export_fig temp_fig/ExpandReport -pdf -r600 -append
-        %         close(newfig_g)
-        
+        %Save Figure to temp_fig
+        fig_name=['temp_fig/',datestr(datetime),'_bifurcation_plot.pdf'];
+        newfig_a=figure;
+        axesobject_a=copyobj(handles.trajectoryplot,newfig_a);
+        hgexport(handles.trajectoryplot, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
+        close(newfig_a)
     case 'boa'
         basin_of_attraction;
         
@@ -1573,13 +1572,12 @@ switch handles.simtype
             hold off
             box off
             
-            %Save Report
-            newfig_h=figure;
-            axesobject_h=copyobj(handles.trajectoryplot,newfig_h);
-            title('2D Phase Portrait')
-            export_fig temp_fig/ExpandReport -pdf -r600 -append
-            close(newfig_h)
-            
+            %Save Figure to temp_fig
+            fig_name=['temp_fig/',datestr(datetime),'_phaseportrait2d_plot.pdf'];
+            newfig_a=figure;
+            axesobject_a=copyobj(handles.trajectoryplot,newfig_a);
+            hgexport(handles.trajectoryplot, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
+            close(newfig_a)
         elseif is3D==1
             plot3(xlns,ylns,zlns,'ks','markersize',7,'markerfacecolor','r')
             %Plot steady-states (if available), otherwise plot final values
@@ -1590,13 +1588,13 @@ switch handles.simtype
             grid on
             box on
             set(handles.Dimensions,'Visible','off')
-            %Save Report
-            newfig_i=figure;
-            axesobject_i=copyobj(handles.trajectoryplot,newfig_i);
-            title('3D Phase Portrait')
-            export_fig temp_fig/ExpandReport -pdf -r600 -append
-            close(newfig_i)
-            
+
+            %Save Figure to temp_fig
+            fig_name=['temp_fig/',datestr(datetime),'_phaseportrait3d_plot.pdf'];
+            newfig_a=figure;
+            axesobject_a=copyobj(handles.trajectoryplot,newfig_a);
+            hgexport(handles.trajectoryplot, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
+            close(newfig_a)
         end
         
         set(handles.overlay,'Enable','on')

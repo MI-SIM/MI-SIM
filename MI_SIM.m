@@ -22,7 +22,7 @@ function varargout = MI_SIM(varargin)
 
 % Edit the above text to modify the response to help MI_SIM
 
-% Last Modified by GUIDE v2.5 23-Feb-2016 09:37:09
+% Last Modified by GUIDE v2.5 24-Feb-2016 13:16:31
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -75,18 +75,22 @@ set(handles.lsanaly,'Value',1,'ForegroundColor',[0.078, 0.169, 0.549])
 set(handles.routhcrit,'Value',0,'ForegroundColor','r')
 set(handles.jacobian_but,'Value',0,'ForegroundColor','r')
 set(handles.uipanel6,'Title','Plot of trajectory from initial conditions')
-set(handles.spmatrix,'Visible','off'); 
+set(handles.spmatrix,'Visible','off');
 set(handles.twodphase,'Enable','off'); set(handles.threedphase,'Enable','off')
 set(handles.colormp,'Visible','off');
 set(handles.normeig,'Visible','off','Value',0)
+handles.simtype='single_p';
 handles.growthmodel='Monod';
-dir_fig=dir('temp_fig');
-if length(dir_fig)<3
+dir_rep=dir('Reports');
+
+if length(dir_rep)<3
+    set(handles.sendreport,'Enable','off')
     set(handles.report_menu,'Enable','off')
     set(handles.reportpanel,'Visible','off'); set(handles.email_add,'Enable','off'); set(handles.server_add,'Enable','off')
     set(handles.email_txt,'Enable','off'); set(handles.serv_txt,'Enable','off');
 else
     set(handles.report_menu,'Enable','on')
+    set(handles.sendreport,'Enable','on')
     set(handles.reportpanel,'Visible','on');set(handles.email_add,'Enable','on'); set(handles.server_add,'Enable','on')
     set(handles.email_txt,'Enable','on'); set(handles.serv_txt,'Enable','on');
 end
@@ -99,8 +103,8 @@ Exist_Gmodels=[{'Monod'};{'Contois'};{'Tessier'};{'Moser'};{'Logistic'};{'Andrew
 if ~isempty(varargin)
     %Check valid model
     if numel(varargin)==2
-    fndmd=strncmpi(varargin(1),Exist_Models,4); %Check first four letters of model for match
-    fndmg=strncmpi(varargin(2),Exist_Gmodels,3); %Check first three letters of model for match
+        fndmd=strncmpi(varargin(1),Exist_Models,4); %Check first four letters of model for match
+        fndmg=strncmpi(varargin(2),Exist_Gmodels,3); %Check first three letters of model for match
     else
         try
             fndmd=strncmpi(varargin,Exist_Models,4);
@@ -117,7 +121,7 @@ if ~isempty(varargin)
     else
         handles.motif_name='Syntrophy';
     end
-
+    
     if (sum(fndmg)>0)
         handles.growthmodel=Exist_Gmodels{mgindex};
         set(handles.growthmenu,'Value',mgindex);
@@ -1010,7 +1014,7 @@ if gvrhc==0
 elseif gvrhc==1
     set(handles.routhcrit,'ForegroundColor',[0.078, 0.169, 0.549])
 end
-   
+
 
 % --- Executes on button press in jacobian_but.
 function jacobian_but_Callback(hObject, eventdata, handles)
@@ -1323,7 +1327,7 @@ if ~isempty(handles.yout_phase)
     str1=get(handles.simparam1,'String'); str2=get(handles.simparam2,'String');
     val1=get(handles.simparam1,'Value'); val2=get(handles.simparam2,'Value');
     param1=str1(val1,:); param2=str2(val2,:);
-
+    
     h=plot(handles.yout_phase,handles.yout_phase2,handles.colr_phase,'linestyle',handles.mrk_phase); hold on
     %Plot initial conditions
     plot(handles.xlns,handles.ylns,'ks','markersize',7,'markerfacecolor','r')
@@ -1332,12 +1336,13 @@ if ~isempty(handles.yout_phase)
     axis tight
     xlabel(param1); ylabel(param2)
     set(h,'linewidth',2)
-    %Save Report
-    newfig_j=figure;
-    axesobject_j=copyobj(handles.trajectoryplot,newfig_j);
-    title('2D Trajectory Phase Plot')
-    export_fig temp_fig/ExpandReport -pdf -r600 -append
-    close(newfig_j)
+    
+    %Save Figure to temp_fig
+    fig_name=['temp_fig/',datestr(datetime),'_phase2D_plot.pdf'];
+    newfig_a=figure;
+    axesobject_a=copyobj(handles.trajectoryplot,newfig_a);
+    hgexport(handles.trajectoryplot, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
+    close(newfig_a)
 end
 
 % --------------------------------------------------------------------
@@ -1348,7 +1353,7 @@ if ~isempty(handles.yout_phase)
     str1=get(handles.simparam1,'String'); str2=get(handles.simparam2,'String');
     val1=get(handles.simparam1,'Value'); val2=get(handles.simparam2,'Value');
     param1=str1(val1,:); param2=str2(val2,:);
-
+    
     h=plot3(handles.yout_phase,handles.yout_phase2,handles.yout_phase3,handles.colr_phase,'linestyle',handles.mrk_phase); hold on
     %Plot initial conditions
     plot3(handles.xlns,handles.ylns,handles.zlns,'ks','markersize',7,'markerfacecolor','r')
@@ -1357,12 +1362,12 @@ if ~isempty(handles.yout_phase)
     axis tight
     xlabel(param1); ylabel(param2); zlabel(str1(handles.val3,:));
     set(h,'linewidth',2); grid on
-    %Save Report
-    newfig_k=figure;
-    axesobject_k=copyobj(handles.trajectoryplot,newfig_k);
-    title('3D Trajectory Phase Plot')
-    export_fig temp_fig/ExpandReport -pdf -r600 -append
-    close(newfig_k)
+    %Save Figure to temp_fig
+    fig_name=['temp_fig/',datestr(datetime),'_phase3D_plot.pdf'];
+    newfig_a=figure;
+    axesobject_a=copyobj(handles.trajectoryplot,newfig_a);
+    hgexport(handles.trajectoryplot, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
+    close(newfig_a)
 end
 
 % --- Executes on button press in normeig.
@@ -1390,10 +1395,10 @@ if strcmp(val_p,'on') && strcmp(val_pp,'off')
         set(gca,'Xlim',[0 endv(end)],'Ylim',[0 ylim(2)]);
         grid on
         legend(handles.hlegend(k).String)
-
+        
     end
-        suplabel('Time (days)');
-        suplabel('Concentration (kgCOD m^{-3})','y');
+    suplabel('Time (days)');
+    suplabel('Concentration (kgCOD m^{-3})','y');
 else
     ax=axes;
     new_h=copyobj(handles.plothandle,ax,'legacy');
@@ -1411,34 +1416,31 @@ function report_menu_Callback(hObject, eventdata, handles)
 
 % --------------------------------------------------------------------
 function gen_rep_Callback(hObject, eventdata, handles)
-%Set Check mark%%%%%
-%%%%%%%%%%%%%%%%%%%%
-%Check for email and server addresses
-strem=get(handles.email_add,'String');
-strserv=get(handles.server_add,'String');
-if strfind(strem,'@') && ~isempty(strserv)
 try
-   setpref('Internet','E_mail','matthew.wade@newcastle.ac.uk'); 
-   setpref('Internet','SMTP_Server',strserv);
-   sendmail(strem,'Microbial Ecology System Analysis Report',['Attached is a PDF report of the mathematical analysis of your microbial models created on ',char(datetime)],'temp_fig/ExpandReport.pdf');
-   %New name of report
-   dte=strcat(datestr(clock,'yyyy-mm-dd-HHMM'));
-   newfile=['Reports/ExpandReport_',dte,'.pdf'];
-   movefile('temp_fig/ExpandReport.pdf',newfile)
+    [fname,pname]=uigetfile('temp_fig/*.pdf','Select figures to include in report','MultiSelect', 'on');
+    for ii=1:length(fname)
+        rname{ii}=[pname,fname{ii}];
+    end
+    append_pdfs('Reports/report.pdf',rname{:});
+    set(handles.sendreport,'Enable','on')
 end
-elseif strfind(strem,'@')==0 && ~isempty(strserv)
-    msgbox('Enter valid e-mail address','Error: No valid e-mail');
-elseif isempty(strserv) && strfind(strem,'@')==1
-    msgbox('Enter valid server address','Error: No valid e-mail');
-else
-    msgbox('Enter valid e-mail and server address','Error: No valid e-mail');
+
+% --------------------------------------------------------------------
+function arch_rep_Callback(hObject, eventdata, handles)
+try
+    movefile('Reports/*.pdf','Reports/Archive/')
 end
 
 % --------------------------------------------------------------------
 function del_rep_Callback(hObject, eventdata, handles)
-%Delete report(s) function here
-%Set Check mark%%%%%
-%%%%%%%%%%%%%%%%%%%%
+%Delete all reports in Report folder
+try
+    delete('Reports/*.pdf')
+end
+%Delete all pdf images in temp_fig
+try
+    delete('temp_fig/*.pdf')
+end
 
 function email_add_Callback(hObject, eventdata, handles)
 
@@ -1480,3 +1482,31 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 function figure1_SizeChangedFcn(hObject, eventdata, handles)
+
+
+% --- Executes on button press in sendreport.
+function sendreport_Callback(hObject, eventdata, handles)
+%Check for email and server addresses
+strem=get(handles.email_add,'String');
+strserv=get(handles.server_add,'String');
+if strfind(strem,'@') && ~isempty(strserv)
+    try
+        setpref('Internet','E_mail',strem);
+        setpref('Internet','SMTP_Server',strserv);
+        sendmail(strem,'Microbial Ecology System Analysis Report',['Attached is a PDF report of the mathematical analysis of your microbial models created on ',char(datetime)],'temp_fig/ExpandReport.pdf');
+        %New name of report
+        dte=strcat(datestr(clock,'yyyy-mm-dd-HHMM'));
+        newfile=['Reports/ExpandReport_',dte,'.pdf'];
+        movefile('temp_fig/ExpandReport.pdf',newfile)
+    end
+elseif strfind(strem,'@')==0 && ~isempty(strserv)
+    msgbox('Enter valid e-mail address','Error: No valid e-mail');
+elseif isempty(strserv) && strfind(strem,'@')==1
+    msgbox('Enter valid server address','Error: No valid e-mail');
+else
+    msgbox('Enter valid e-mail and server address','Error: No valid e-mail');
+end
+
+
+
+

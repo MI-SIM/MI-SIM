@@ -1,4 +1,4 @@
-function dP=four_mod(time, init, S1in, D, Y1, kdec1, Y2, kdec2, Y3, kdec3, km1, Ks1, km2, Ks2, km3, Ks3, Ks3c, KI2,gamma0,gamma1,gamma2,S2in,S3in,h,h1,tt,motif,flag,cno)
+function dP=model_gen(time, init, S1in, D, Y1, kdec1, Y2, kdec2, Y3, kdec3, km1, Ks1, km2, Ks2, km3, Ks3, Ks3c, KI2,gamma0,gamma1,gamma2,S2in,S3in,h,h1,tt,motif,flag,cno)
 %four_mod - calls motif function to be solved with the ODE solver
 %
 % Author: Dr. Matthew Wade, School of Civil Engineering & Geosciences

@@ -7,6 +7,45 @@
 % Website: https://github.com/MI-SIM/MI-SIM
 % September 2015; Last revision: 05-Jan-2016
 
+%Save GUI Figure to temp_fig
+fig_name=['temp_fig/',datestr(datetime),'_aaa_parameters.pdf'];
+
+%Create figure to display parameters etc
+f = figure('Units','characters',...
+    'Position',[0 0 150 60],...
+    'HandleVisibility','callback',...
+    'IntegerHandle','off',...
+    'Renderer','painters');
+
+mainPanel = uipanel('Units','characters',...
+    'Position',[0 10 90 50],...
+    'parent',f);
+botPanel = uipanel('BorderType','etchedin',...
+    'Units','characters',...
+    'Position',[0 0 150 10],...
+    'Parent',f);
+rightPanel = uipanel('BorderType','etchedin',...
+    'Units','characters',...
+    'Position',[90 10 60 50],...
+    'Parent',f);
+
+%Copy parameters
+axesobject_par1=copyobj(handles.values.Children,mainPanel);
+axesobject_fig1=copyobj(mfi,botPanel);
+set(axesobject_fig1,'Position',[0 0 1 1]);
+panax1 = axes('Units','normal', 'Position', [0 0 1 1], 'Parent', rightPanel);
+set(gca,'Visible','off')
+text(0.2,0.8,'MI-Sim Report','fontsize',24)
+text(0.2,0.7,datestr(datetime),'fontsize',20)
+text(0,0.6,'Equations','fontsize',24)
+text(0,0.4,handles.eqtx,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
+text(0,0.2,handles.fnctext,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
+
+opts.Width = 20;
+opts.Height = 20;
+opts.format = 'pdf';
+hgexport(f, fig_name, opts);
+close(f)
 yout=handles.yout;
 tout=handles.tout;
 fixed_numerical=handles.fn;
@@ -141,27 +180,12 @@ switch which_plot
                 handles.legend1=legend(legd,'location','best');
                 hold off
                 
-                %Generate image of parameters
-%                 newfig_par=figure;
-%                 axesobject_par1=copyobj(handles.values.Children,newfig_par);
-% 
-%                 set(gca,'Visible','off')
-%                 text(0,1,'Parameters','interpreter','latex','fontsize',14,'fontweight','bold')
-%                 text(0.4,0.6,handles.eqtx,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
-%                 text(0.4,0.2,handles.fnctx,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
-%                 set(gcf,'Position',[1000 911 747 427])
-%                 axesobject_par2=copyobj(handles.motif_image,newfig_par);
-%                 set(axesobject_par2,'Position',[30 25 100 4])
-%                 export_fig temp_fig/ExpandReport -pdf -r600 -append
-%                 close(newfig_par)
-%                 
-%                 %Save Report
-%                 newfig_a=figure;
-%                 axesobject_a=copyobj([leg,handles.solutionplot],newfig_a);
-%                 title('Plot of system solutions')
-%                 export_fig temp_fig/ExpandReport -pdf -r600 -append
-%                 close(newfig_a)
-                
+                %Save Figure to temp_fig
+                fig_name=['temp_fig/',datestr(datetime),'_dynamics_plot.pdf'];
+                newfig_a=figure;
+                axesobject_a=copyobj([handles.legend1,handles.solutionplot],newfig_a);
+                hgexport(newfig_a, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
+                close(newfig_a)
             case 'phase' %Phase plot
                 
                 axes(handles.solutionplot);
@@ -188,13 +212,12 @@ switch which_plot
                     zlabel(handles.solutionplot,labels(indices_check(3)))
                 end
                 
-                %Save Report
-                newfig_b=figure;
-                axesobject_b=copyobj(handles.solutionplot,newfig_b);
-                title('Phase Plot')
-                export_fig temp_fig/ExpandReport -pdf -r600 -append
-                close(newfig_b)
-                
+                %Save Figure to temp_fig
+                fig_name=['temp_fig/',datestr(datetime),'_phase_plot.pdf'];
+                newfig_a=figure;
+                axesobject_a=copyobj(handles.solutionplot,newfig_a);
+                hgexport(handles.solutionplot, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
+                close(newfig_a)
             case 'subp' %Subplotting each variable separately
                 
                 if isfield(handles,'solutionplot') && ishandle(handles.solutionplot)
@@ -257,13 +280,12 @@ switch which_plot
                 %suplabel('Time (days)');
                 %suplabel('Concentration (kgCOD m^{-3})','y');
                 
-                %Save Report
-%                 newfig_c=figure;
-%                 axesobject_c=copyobj(handles.solutionplot,newfig_c);
-%                 title('Individual subplots of solutions')
-%                 export_fig temp_fig/ExpandReport -pdf -r600 -append
-%                 close(newfig_c)
-                
+                %Save Figure to temp_fig
+                fig_name=['temp_fig/',datestr(datetime),'_subplot_plot.pdf'];
+                newfig_a=figure;
+                axesobject_a=copyobj(handles.solutionplot,newfig_a);
+                hgexport(handles.solutionplot, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
+                close(newfig_a)
             case 'eig' %Eigenvalue plot
                 axes(handles.solutionplot);
                 %reset the plot
@@ -309,12 +331,12 @@ switch which_plot
                set(hx,'linestyle','--','color','k')
                set(hy,'linestyle','--','color','k')
                
-               %Save Report
-               newfig_d=figure;
-               axesobject_d=copyobj(handles.solutionplot,newfig_d);
-               title('Eigenvalues Plot')
-               export_fig temp_fig/ExpandReport -pdf -r600 -append
-               close(newfig_d)
+                %Save Figure to temp_fig
+                fig_name=['temp_fig/',datestr(datetime),'_eigenvalue_plot.pdf'];
+                newfig_a=figure;
+                axesobject_a=copyobj(handles.solutionplot,newfig_a);
+                hgexport(handles.solutionplot, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
+                close(newfig_a)
         end
 
     case 'traj'  %Trajectory plot
@@ -361,13 +383,12 @@ switch which_plot
                 end
                 set(handles.overlay,'enable','on')
                 
-                %Save Report
-%                 newfig_e=figure;
-%                 axesobject_e=copyobj(handles.trajectoryplot,newfig_e);
-%                 title('2D Trajectory Plot')
-%                 export_fig temp_fig/ExpandReport -pdf -r600 -append
-%                 close(newfig_e)
-                
+                %Save Figure to temp_fig
+                fig_name=['temp_fig/',datestr(datetime),'_2d_trajectory_plot.pdf'];
+                newfig_a=figure;
+                axesobject_a=copyobj(handles.trajectoryplot,newfig_a);
+                hgexport(handles.trajectoryplot, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
+                close(newfig_a)
             case 'three' %3D plot
                 %if user wants to overlay multiple trajectories onto the plot of
                 %trajectories
@@ -409,13 +430,12 @@ switch which_plot
                 end
                 set(handles.overlay,'enable','on')
 
-                %Save Report
-                newfig_f=figure;
-                axesobject_f=copyobj(handles.trajectoryplot,newfig_f);
-                title('3D Trajectory Plot')
-                export_fig temp_fig/ExpandReport -pdf -r600 -append
-                close(newfig_f)
-                
+                %Save Figure to temp_fig
+                fig_name=['temp_fig/',datestr(datetime),'_3d_trajectory_plot.pdf'];
+                newfig_a=figure;
+                axesobject_a=copyobj(handles.trajectoryplot,newfig_a);
+                hgexport(handles.trajectoryplot, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
+                close(newfig_a)
         end
         
 end
