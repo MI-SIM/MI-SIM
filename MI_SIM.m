@@ -83,7 +83,7 @@ handles.simtype='single_p';
 handles.growthmodel='Monod';
 dir_rep=dir('Reports');
 
-if length(dir_rep)<4
+if length(dir_rep)<5
     set(handles.sendreport,'Enable','off')
     set(handles.report_menu,'Enable','off')
     set(handles.reportpanel,'Visible','off'); set(handles.email_add,'Enable','off'); set(handles.server_add,'Enable','off')
@@ -1421,7 +1421,8 @@ try
     for ii=1:length(fname)
         rname{ii}=[pname,fname{ii}];
     end
-    append_pdfs('Reports/report.pdf',rname{:});
+    reportname=['Reports/',datestr(datetime),'_report.pdf'];
+    append_pdfs(reportname,rname{:});
     set(handles.sendreport,'Enable','on')
 end
 
@@ -1489,19 +1490,19 @@ function sendreport_Callback(hObject, eventdata, handles)
 %Check for email and server addresses
 strem=get(handles.email_add,'String');
 strserv=get(handles.server_add,'String');
-if strfind(strem,'@') && ~isempty(strserv)
+[fname,pname]=uigetfile('Reports/*.pdf','Select Report to send','MultiSelect', 'off');
+
+reportfile=[pname,fname];
+
+if ~isempty(strem) && strfind(strem,'@') && ~isempty(strserv)
     try
         setpref('Internet','E_mail',strem);
         setpref('Internet','SMTP_Server',strserv);
-        sendmail(strem,'Microbial Ecology System Analysis Report',['Attached is a PDF report of the mathematical analysis of your microbial models created on ',char(datetime)],'temp_fig/ExpandReport.pdf');
-        %New name of report
-        dte=strcat(datestr(clock,'yyyy-mm-dd-HHMM'));
-        newfile=['Reports/ExpandReport_',dte,'.pdf'];
-        movefile('temp_fig/ExpandReport.pdf',newfile)
+        sendmail(strem,'Microbial Ecology System Analysis Report',['Attached is a PDF report of the mathematical analysis of your microbial models created on ',char(datetime)],reportfile);
     end
-elseif strfind(strem,'@')==0 && ~isempty(strserv)
+elseif  ~isempty(strem) && strfind(strem,'@')==0 && ~isempty(strserv)
     msgbox('Enter valid e-mail address','Error: No valid e-mail');
-elseif isempty(strserv) && strfind(strem,'@')==1
+elseif ~isempty(strem) && isempty(strserv) && strfind(strem,'@')==1 
     msgbox('Enter valid server address','Error: No valid e-mail');
 else
     msgbox('Enter valid e-mail and server address','Error: No valid e-mail');

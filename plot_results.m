@@ -31,7 +31,7 @@ rightPanel = uipanel('BorderType','etchedin',...
 
 %Copy parameters
 axesobject_par1=copyobj(handles.values.Children,mainPanel);
-axesobject_fig1=copyobj(mfi,botPanel);
+axesobject_fig1=copyobj(handles.motif_image,botPanel);
 set(axesobject_fig1,'Position',[0 0 1 1]);
 panax1 = axes('Units','normal', 'Position', [0 0 1 1], 'Parent', rightPanel);
 set(gca,'Visible','off')
