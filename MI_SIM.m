@@ -83,7 +83,7 @@ handles.simtype='single_p';
 handles.growthmodel='Monod';
 dir_rep=dir('Reports');
 
-if length(dir_rep)<3
+if length(dir_rep)<4
     set(handles.sendreport,'Enable','off')
     set(handles.report_menu,'Enable','off')
     set(handles.reportpanel,'Visible','off'); set(handles.email_add,'Enable','off'); set(handles.server_add,'Enable','off')
