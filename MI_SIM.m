@@ -22,7 +22,7 @@ function varargout = MI_SIM(varargin)
 
 % Edit the above text to modify the response to help MI_SIM
 
-% Last Modified by GUIDE v2.5 24-Feb-2016 13:16:31
+% Last Modified by GUIDE v2.5 25-Feb-2016 14:33:27
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -119,7 +119,7 @@ if ~isempty(varargin)
     if (sum(fndmd)>0)
         handles.motif_name=Exist_Models{mdindex};
     else
-        handles.motif_name='Syntrophy';
+        handles.motif_name='Cooperation';
     end
     
     if (sum(fndmg)>0)
@@ -216,6 +216,8 @@ end
 function growthmenu_Callback(hObject, eventdata, handles)
 contents = cellstr(get(hObject,'String'));
 handles.growthmodel=contents{get(hObject,'Value')};
+model_sel(handles);
+
 guidata(hObject,handles)
 
 % --- Executes during object creation, after setting all properties.
@@ -325,20 +327,20 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-function ks1a_in_Callback(hObject, eventdata, handles)
-Ks1a=str2double(get(hObject,'String'));
+function n1_in_Callback(hObject, eventdata, handles)
+n1=str2double(get(hObject,'String'));
 
 % --- Executes during object creation, after setting all properties.
-function ks1a_in_CreateFcn(hObject, eventdata, handles)
+function n1_in_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
-function ks2a_in_Callback(hObject, eventdata, handles)
-Ks2a=str2double(get(hObject,'String'));
+function n2_in_Callback(hObject, eventdata, handles)
+n2=str2double(get(hObject,'String'));
 
 % --- Executes during object creation, after setting all properties.
-function ks2a_in_CreateFcn(hObject, eventdata, handles)
+function n2_in_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -373,11 +375,11 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-function ks3a_in_Callback(hObject, eventdata, handles)
-Ks3a=str2double(get(hObject,'String'));
+function n3_in_Callback(hObject, eventdata, handles)
+n3=str2double(get(hObject,'String'));
 
 % --- Executes during object creation, after setting all properties.
-function ks3a_in_CreateFcn(hObject, eventdata, handles)
+function n3_in_CreateFcn(hObject, eventdata, handles)
 
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
@@ -703,25 +705,25 @@ if Ks3c<0 || isnumeric(Ks3c)==0
 else
 end
 
-Ks1a = str2double(get(handles.ks1a_in,'String'));
-if Ks1a<0 || isnumeric(Ks1a)==0
-    set(handles.ks1a_in,'String',3);
-    Ks1a = str2double(get(handles.ks1a_in,'String'));
-    msgbox('The value entered for KS1c was not valid so the default value was reset','Error','error')
+n1 = str2double(get(handles.n1_in,'String'));
+if n1<0 || isnumeric(n1)==0
+    set(handles.n1_in,'String',3);
+    n1 = str2double(get(handles.n1_in,'String'));
+    msgbox('The value entered for n1 was not valid so the default value was reset','Error','error')
 else
 end
-Ks2a = str2double(get(handles.ks2a_in,'String'));
-if Ks2a<0 || isnumeric(Ks2a)==0
-    set(handles.ks2a_in,'String',2);
-    Ks2a = str2double(get(handles.ks2a_in,'String'));
-    msgbox('The value entered for KS2c was not valid so the default value was reset','Error','error')
+n2 = str2double(get(handles.n2_in,'String'));
+if n2<0 || isnumeric(n2)==0
+    set(handles.n2_in,'String',2);
+    n2 = str2double(get(handles.n2_in,'String'));
+    msgbox('The value entered for n2 was not valid so the default value was reset','Error','error')
 else
 end
-Ks3a = str2double(get(handles.ks3a_in,'String'));
-if Ks3a<0 || isnumeric(Ks3a)==0
-    set(handles.ks3a_in,'String',2);
-    Ks3a = str2double(get(handles.ks3a_in,'String'));
-    msgbox('The value entered for KS3c was not valid so the default value was reset','Error','error')
+n3 = str2double(get(handles.n3_in,'String'));
+if n3<0 || isnumeric(n3)==0
+    set(handles.n3_in,'String',2);
+    n3 = str2double(get(handles.n3_in,'String'));
+    msgbox('The value entered for n3 was not valid so the default value was reset','Error','error')
 else
 end
 gamma0 = str2double(get(handles.gamma0,'String'));
@@ -1133,8 +1135,8 @@ set(handles.s1in_in,'String',5);
 set(handles.ki2_in,'String',0.0000035);
 set(handles.ks1_in,'String',0.3);
 set(handles.ks2_in,'String',0.000025);
-set(handles.ks1a_in,'String',3);
-set(handles.ks2a_in,'String',2);
+set(handles.n1_in,'String',3);
+set(handles.n2_in,'String',2);
 set(handles.d_in,'String',0.1);
 set(handles.time_in,'String',1000);
 set(handles.s1_init,'String',0.1);
@@ -1145,7 +1147,7 @@ set(handles.km3_in,'String',21);
 set(handles.y3_in,'String',0.04);
 set(handles.kdec3_in,'String',0.02);
 set(handles.ks3_in,'String',0.001);
-set(handles.ks3a_in,'String',2);
+set(handles.n3_in,'String',2);
 set(handles.gamma0,'String',0.43);
 set(handles.gamma1,'String',0.1429);
 set(handles.gamma2,'String',0.0769);
@@ -1507,7 +1509,3 @@ elseif ~isempty(strem) && isempty(strserv) && strfind(strem,'@')==1
 else
     msgbox('Enter valid e-mail and server address','Error: No valid e-mail');
 end
-
-
-
-
