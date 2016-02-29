@@ -45,7 +45,8 @@ if exist('handles.stbtxt')
     delete(handles.stbtxt)
 end
 %Define system equations
-[eqs, f1, f2, f3, I2, I3, I4]=define_system_equations(motif,growth);
+[eqs, f1, f2, f3, I2, I3, I4]=define_system_equations(motif,growth,handles);
+gfnc=[f1,f2,f3,I2,I3,I4]; %Growth functions
 
 %% Algorithms
 %Case structure for analysis routines
@@ -54,13 +55,7 @@ switch handles.simtype
         
         %Get the symbolic variables and parameters
         variables=set_variables(growth);
-        switch growth
-            case 'Monod'
-            parameters=[km1 Y1 kdec1 km2 Y2 kdec2 km3 Y3 kdec3 KI2 D S1in S2in S3in time1 Ks1 Ks2 Ks3 Ks3c gamma0 gamma1 gamma2];
-            case 'Contois'
-            parameters=[km1 Y1 kdec1 km2 Y2 kdec2 km3 Y3 kdec3 KI2 D S1in s2in S3in time1 Ks1a Ks2a Ks3a Ks3c gamma0 gamma1 gamma2];
-        end
-        
+        parameters=eval(variables);
         %Check number of equations
         noeq=length(eqs);
         
@@ -102,19 +97,33 @@ switch handles.simtype
             assumeAlso(S1>=0); assumeAlso(X1>=0); assumeAlso(S2>=0); assumeAlso(X2>=0); %Make assumptions (X,S real non-negative)
             %Use mupad to get all solutions
             sol=feval(symengine,'solve',[eq1_numerical==0 eq2_numerical==0 eq3_numerical==0 eq4_numerical==0],[S1,X1,S2,X2]);
-            
-            sol=children(sol);
-            
             % Loop over solutions
             doub_sol=[];
-            for i=1:numel(sol)
-                pairs=children(sol{i});
-                t=zeros(1,numel(pairs));
-                for j=1:numel(pairs)
-                    temp=pairs{j};
-                    t(j)=double(temp(2));
+            try
+                sol=children(sol);
+
+                try
+                    for i=1:numel(sol)
+                        pairs=children(sol{i});
+                        t=zeros(1,numel(pairs));
+                        for j=1:numel(pairs)
+                            temp=pairs{j};
+                            t(j)=double(temp(2));
+                        end
+                        doub_sol(i,:)=t;
+                    end
+                    
+                catch
+                    sol2=children(vpa(sol));
+                    csol=children(sol2{2});
+                    for i=1:numel(csol)
+                        temp=csol{i};
+                        doub_sol(i,:)=double(temp);
+                    end
                 end
-                doub_sol(i,:)=t;
+            catch
+                doub_sol=double(sol);
+                
             end
 
             set(handles.s1_check,'Enable','on','value',1); set(handles.x1_check,'Enable','on','value',1);
@@ -172,8 +181,12 @@ switch handles.simtype
         
         format shorteng
         format compact
-        fixed_numerical1=doub_sol;
-        
+        [xx,yy]=size(doub_sol);
+        if yy==1
+            fixed_numerical1=doub_sol';
+        else
+            fixed_numerical1=doub_sol;
+        end
         %Set the fixed points in the GUI
         if noeq==3
             set(handles.fixed_points_s1,'String',double(fixed_numerical1(:,1)));
@@ -248,16 +261,10 @@ switch handles.simtype
         h=handles.timestamp;
         h1=handles.progress;
         tt=time1; flag=[]; cno=[];
-        switch growth
-            case 'Monod'
-                te = cputime;
-                eval(['[tout,yout]=',solver,'(@model_gen, [0:0.01:time1], init2, options, S1in, D, Y1, kdec1, Y2, kdec2, Y3, kdec3, km1, Ks1, km2, Ks2, km3, Ks3, Ks3c, KI2,gamma0, gamma1, gamma2, S2in, S3in,h,h1,tt,motif,flag,cno);']);
-                tfe= cputime-te;
-            case 'Contois'
-                te = cputime;
-                eval(['[tout,yout]=ode23s(@four_mod2, [0:0.01:time1], init2, options, S1in, D, Y1, kdec1, Y2, kdec2, Y3, kdec3, km1, Ks1a, km2, Ks2a, km3, Ks3a, KI2,gamma0,S3in);']);
-                tfe= cputime-te;
-        end
+        te = cputime;
+        eval(['[tout,yout]=',solver,'(@model_gen, [0:0.01:time1], init2, options, parameters,h,h1,gfnc,growth,motif,flag,cno);']);
+        tfe= cputime-te;
+
         set(handles.func_prog,'String','Completed: Dynamics','ForegroundColor',[0 0.6 1])
         handles.tout=tout;
         handles.yout=yout;
