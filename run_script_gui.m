@@ -75,20 +75,17 @@ switch handles.simtype
             %Use mupad to get all solutions
             sol=feval(symengine,'solve',[eq1_numerical==0 eq2_numerical==0 eq3_numerical==0],[S1,X1,X2]);
             
-            sol=children(sol);
- 
-            % Loop over solutions
-            doub_sol=[];
+            doub_sol=zeros(numel(sol),3);
             for i=1:numel(sol)
-                pairs=children(sol{i});
-                t=zeros(1,numel(pairs));
-                for j=1:numel(pairs)
-                    temp=pairs{j};
-                    t(j)=double(temp(2));
+                % Loop over the number of solutions
+                a=sol(i);
+                for j=1:numel(a)
+                    % Loop over how many component
+                    b=children(a(j));
+                    doub_sol(i,j)=double(b(2));
                 end
-                doub_sol(i,:)=t;
             end
-            
+            clhead=[{'S1'},{'X1'},{'X2'}];
             set(handles.s1_check,'Enable','on','value',1); set(handles.x1_check,'Enable','on','value',1);
             set(handles.s2_check,'Enable','off','value',0); set(handles.x2_check,'Enable','on','value',1);
             set(handles.s3_check,'Enable','off','value',0); set(handles.x3_check,'Enable','off','value',0);
@@ -97,35 +94,19 @@ switch handles.simtype
             assumeAlso(S1>=0); assumeAlso(X1>=0); assumeAlso(S2>=0); assumeAlso(X2>=0); %Make assumptions (X,S real non-negative)
             %Use mupad to get all solutions
             sol=feval(symengine,'solve',[eq1_numerical==0 eq2_numerical==0 eq3_numerical==0 eq4_numerical==0],[S1,X1,S2,X2]);
-            % Loop over solutions
-            doub_sol=[];
-            try
-                sol=children(sol);
-
-                try
-                    for i=1:numel(sol)
-                        pairs=children(sol{i});
-                        t=zeros(1,numel(pairs));
-                        for j=1:numel(pairs)
-                            temp=pairs{j};
-                            t(j)=double(temp(2));
-                        end
-                        doub_sol(i,:)=t;
-                    end
-                    
-                catch
-                    sol2=children(vpa(sol));
-                    csol=children(sol2{2});
-                    for i=1:numel(csol)
-                        temp=csol{i};
-                        doub_sol(i,:)=double(temp);
-                    end
+            
+            doub_sol=zeros(numel(sol),4);
+            for i=1:numel(sol)
+                % Loop over the number of solutions
+                a=sol(i);
+                for j=1:numel(a)
+                    % Loop over how many component
+                    b=children(a(j));
+                    doub_sol(i,j)=double(b(2));
                 end
-            catch
-                doub_sol=double(sol);
-                
             end
 
+            clhead=[{'S1'},{'X1'},{'S2'},{'X2'}];
             set(handles.s1_check,'Enable','on','value',1); set(handles.x1_check,'Enable','on','value',1);
             set(handles.s2_check,'Enable','on','value',1); set(handles.x2_check,'Enable','on','value',1);
             set(handles.s3_check,'Enable','off','value',0); set(handles.x3_check,'Enable','off','value',0);
@@ -135,20 +116,18 @@ switch handles.simtype
             %Use mupad to get all solutions
             sol=feval(symengine,'solve',[eq1_numerical==0 eq2_numerical==0 eq3_numerical==0 eq4_numerical==0 eq5_numerical==0],[S1,X1,S2,X2,S3]);
             
-            sol=children(sol);
- 
-            % Loop over solutions
-            doub_sol=[];
+            doub_sol=zeros(numel(sol),5);
             for i=1:numel(sol)
-                pairs=children(sol{i});
-                t=zeros(1,numel(pairs));
-                for j=1:numel(pairs)
-                    temp=pairs{j};
-                    t(j)=double(temp(2));
+                % Loop over the number of solutions
+                a=sol(i);
+                for j=1:numel(a)
+                    % Loop over how many component
+                    b=children(a(j));
+                    doub_sol(i,j)=double(b(2));
                 end
-                doub_sol(i,:)=t;
             end
             
+            clhead=[{'S1'},{'X1'},{'S2'},{'X2'},{'S3'}];
             set(handles.s1_check,'Enable','on','value',1); set(handles.x1_check,'Enable','on','value',1);
             set(handles.s2_check,'Enable','on','value',1); set(handles.x2_check,'Enable','on','value',1);
             set(handles.s3_check,'Enable','on','value',1); set(handles.x3_check,'Enable','off','value',0);
@@ -157,6 +136,7 @@ switch handles.simtype
             assumeAlso(S1>=0); assumeAlso(X1>=0); assumeAlso(S2>=0); assumeAlso(X2>=0); assumeAlso(S3>=0); assumeAlso(X3>=0); %Make assumptions (X,S real non-negative)
             %Use mupad to get all solutions
             sol=feval(symengine,'solve',[eq1_numerical==0 eq2_numerical==0 eq3_numerical==0 eq4_numerical==0 eq5_numerical==0 eq6_numerical==0],[S1,X1,S2,X2,S3,X3]);
+
             temp=vpa(sol);
             members=children(children(temp));
             solutions = cellfun(@(c)c(:),members,'UniformOutput',false);
@@ -169,6 +149,7 @@ switch handles.simtype
             else
                 doub_sol=double(vpa(num_sol));
             end
+            clhead=[{'S1'},{'X1'},{'S2'},{'X2'},{'S3'},{'X3'}];
             set(handles.s1_check,'Enable','on','value',1); set(handles.x1_check,'Enable','on','value',1);
             set(handles.s2_check,'Enable','on','value',1); set(handles.x2_check,'Enable','on','value',1);
             set(handles.s3_check,'Enable','on','value',1); set(handles.x3_check,'Enable','on','value',1);
@@ -188,53 +169,19 @@ switch handles.simtype
             fixed_numerical1=doub_sol;
         end
         %Set the fixed points in the GUI
-        if noeq==3
-            set(handles.fixed_points_s1,'String',double(fixed_numerical1(:,1)));
-            set(handles.fixed_points_x2,'String',double(fixed_numerical1(:,2)));
-            set(handles.fixed_points_x1,'String',double(fixed_numerical1(:,3)));
-            S2_init=[];
-        elseif noeq==4
-            set(handles.fixed_points_s1,'String',double(fixed_numerical1(:,1)));
-            set(handles.fixed_points_x1,'String',double(fixed_numerical1(:,2)));
-            set(handles.fixed_points_s2,'String',double(fixed_numerical1(:,3)));
-            set(handles.fixed_points_x2,'String',double(fixed_numerical1(:,4)));
-        elseif noeq==5
-            set(handles.fixed_points_s1,'String',double(fixed_numerical1(:,1)));
-            set(handles.fixed_points_x1,'String',double(fixed_numerical1(:,2)));
-            set(handles.fixed_points_s2,'String',double(fixed_numerical1(:,3)));
-            set(handles.fixed_points_x2,'String',double(fixed_numerical1(:,4)));
-            set(handles.fixed_points_s3,'String',double(fixed_numerical1(:,5)));
-        elseif noeq==6
-            set(handles.fixed_points_s1,'String',double(fixed_numerical1(:,1)));
-            set(handles.fixed_points_x1,'String',double(fixed_numerical1(:,2)));
-            set(handles.fixed_points_s2,'String',double(fixed_numerical1(:,3)));
-            set(handles.fixed_points_x2,'String',double(fixed_numerical1(:,4)));
-            set(handles.fixed_points_s3,'String',double(fixed_numerical1(:,5)));
-            set(handles.fixed_points_x3,'String',double(fixed_numerical1(:,6)));
-        end
-        
-        %Set labels
         lfn=length(fixed_numerical1(:,1));
-        if lfn<=5
-            for k=1:5
-                if k<=lfn
-                    eval(['set(handles.fp',num2str(k),',','''Visible'',''on'')'])
-                else
-                    eval(['set(handles.fp',num2str(k),',','''Visible'',''off'')'])
-                end
-            end
-        else
-            for k=1:5
-                eval(['set(handles.fp',num2str(k),',','''Visible'',''on'')'])
-            end
+        rnm={};
+        for k=1:lfn
+            rnm=[rnm,{['FP',num2str(k)]}];
         end
+        set(handles.infotable,'Visible','on','Data',fixed_numerical1,'RowName',rnm,'ColumnName',clhead)
+     
         
         %% Stability
         %Shows the stability of the fixed points in the GUI
         stability_analysis
-        set(handles.fixed_points_stability,'String',s');
-        set(handles.fixed_points_stability_rh,'String',s2');
-        
+        set(handles.stabtable,'Visible','on','Data',[s',s2'],'RowName',rnm)
+
         %Options for ODE solver
         if jacobanaly==1
             options=odeset('RelTol',reltol,'AbsTol',abstol,'OutputFcn',[],'Jpattern',Jpat);

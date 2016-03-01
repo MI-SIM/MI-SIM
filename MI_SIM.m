@@ -22,7 +22,7 @@ function varargout = MI_SIM(varargin)
 
 % Edit the above text to modify the response to help MI_SIM
 
-% Last Modified by GUIDE v2.5 25-Feb-2016 14:33:27
+% Last Modified by GUIDE v2.5 01-Mar-2016 13:05:07
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -79,6 +79,8 @@ set(handles.spmatrix,'Visible','off');
 set(handles.twodphase,'Enable','off'); set(handles.threedphase,'Enable','off')
 set(handles.colormp,'Visible','off');
 set(handles.normeig,'Visible','off','Value',0)
+set(handles.infotable,'Visible','off')
+set(handles.stabtable,'Visible','off')
 handles.simtype='single_p';
 handles.growthmodel='Monod';
 dir_rep=dir('Reports');

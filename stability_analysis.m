@@ -120,17 +120,11 @@ if stabanaly==1 %Linear stability analysis
         h1=handles.progress;
         tt=time1;
         flag=[];
-        switch growth
-            case 'Monod'
-                eval(['[~,yout2]=',solver,'(@model_gen, 0:0.01:time1, init, options, S1in, D, Y1, kdec1, Y2, kdec2, Y3, kdec3, km1, Ks1, km2, Ks2, km3, Ks3, Ks3c, KI2, gamma0,gamma1,gamma2, S2in, S3in,h,h1,tt,motif,flag);']);
-                
-            case 'Contois'
-                [~,yout2]=ode23s(@four_mod2, [0:0.01:time1], init, options, Spin1, D, Yp1, kdecp1, YH1, kdecH1, kmp1, kmH1, Ksxp1, KsxH1, KIH1); %CHANGE FOR ADDITIONAL substrate 3
-        end
-        
+
+        eval(['[~,yout2]=',solver,'(@model_gen, 0:0.01:time1, init, options, parameters,h,h1,gfnc,growth,motif,flag);']);
+
         %calculate the difference between the trajectories
         dif1(:,i)=yout2(end,:)-initial;
-        %dif2(:,i)=yout3(end,:)-initial;
         
         error=str2double(get(handles.error_val,'String'));
         if error<0 || isnumeric(error)==0
@@ -141,9 +135,9 @@ if stabanaly==1 %Linear stability analysis
         end
         
         if norm(dif1(:,i))<error
-            s(:,i)={'Stable'};
+            s(:,i)={'Stable'}; s2(:,i)={'-'};
         else
-            s(:,i)={'Unstable'};
+            s(:,i)={'Unstable'}; s2(:,i)={'-'};
         end
         set(handles.func_prog,'String',['Completed: Stability Analysis ',num2str(i)],'ForegroundColor',[0 0.6 1])
     end

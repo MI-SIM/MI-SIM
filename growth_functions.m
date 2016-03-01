@@ -231,7 +231,7 @@ switch growth
                     f3=km3*S3/(Ks3+S3);
                 end
                 f1tx = '$f_1 = \frac{k_{m,1}S_1}{K_{S,1} + S_1}\frac{S_3}{K_{S,3c} + S_3}$';
-                f2tx = '$f_2 = \frac{k_{m,2}S_1}{K_{S,2} + S_2 + \frac{S_2^2}{K_{i,2}}}$';
+                f2tx = '$f_2 = \frac{k_{m,2}S_2}{K_{S,2} + S_2 + \frac{S_2^2}{K_{i,2}}}$';
                 f3tx = '$f_3 = \frac{k_{m,3}S_3}{K_{S,3} + S_3}$';
                 I2tx = '$I_2=1$';
         end

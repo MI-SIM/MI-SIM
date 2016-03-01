@@ -7,7 +7,7 @@ function motif_out=model_sel(handles)
 % alternative contact: Dr. Nick Parker, nick.parker@ncl.ac.uk
 % Website: https://github.com/MI-SIM/MI-SIM
 % February 2015; Last revision: 24-Feb-2016
-
+set(handles.infotable,'Visible','off');
 switch handles.motif_name
     case 'Commensalism'
         set(handles.model_label,'String','4 ODE: Food Chain');
@@ -30,11 +30,7 @@ switch handles.motif_name
         set(handles.s3in_in,'enable','off'); set(handles.text48,'enable','off')
         set(handles.timeplot,'checked','on'); set(handles.phaseplot,'checked','off')
         set(handles.ks32_in,'enable','off','String',1e-6); set(handles.text81,'enable','off')
-        set(handles.fixed_points_s1,'String','-'); set(handles.fixed_points_x1,'String','-')
-        set(handles.fixed_points_s2,'String','-'); set(handles.fixed_points_x2,'String','-')
-        set(handles.fixed_points_s3,'String','-'); set(handles.fixed_points_stability,'String','-');
-        set(handles.fixed_points_stability_rh,'String','-');
-        
+
         handles.plotsolution='time'; handles.plotdim='two';
         
         %Parameters
@@ -119,10 +115,6 @@ switch handles.motif_name
         set(handles.s3in_in,'enable','off'); set(handles.text48,'enable','off')
         set(handles.ks32_in,'enable','off','String',1e-6); set(handles.text81,'enable','off')
         set(handles.timeplot,'checked','on'); set(handles.phaseplot,'checked','off');
-        set(handles.fixed_points_s1,'String','-'); set(handles.fixed_points_x1,'String','-');
-        set(handles.fixed_points_s2,'String','-'); set(handles.fixed_points_x2,'String','-');
-        set(handles.fixed_points_s3,'String','-'); set(handles.fixed_points_stability,'String','-');
-        set(handles.fixed_points_stability_rh,'String','-');
         
         handles.plotsolution='time'; handles.plotdim='two';
         
@@ -206,11 +198,7 @@ switch handles.motif_name
         set(handles.s3in_in,'enable','off'); set(handles.text48,'enable','off')
         set(handles.ks32_in,'enable','off','String',1e-6); set(handles.text81,'enable','off')
         set(handles.timeplot,'checked','on'); set(handles.phaseplot,'checked','off');
-        set(handles.fixed_points_s1,'String','-'); set(handles.fixed_points_x1,'String','-');
-        set(handles.fixed_points_s2,'String','-'); set(handles.fixed_points_x2,'String','-');
-        set(handles.fixed_points_s3,'String','-'); set(handles.fixed_points_stability,'String','-');
-        set(handles.fixed_points_stability_rh,'String','-');
-        
+
         handles.plotsolution='time'; handles.plotdim='two';
         
         %Parameters
@@ -295,11 +283,7 @@ switch handles.motif_name
         set(handles.s3in_in,'enable','off'); set(handles.text48,'enable','off')
         set(handles.ks32_in,'enable','off','String',1e-6); set(handles.text81,'enable','off')
         set(handles.timeplot,'checked','on'); set(handles.phaseplot,'checked','off');
-        set(handles.fixed_points_s1,'String','-'); set(handles.fixed_points_x1,'String','-');
-        set(handles.fixed_points_s2,'String','-'); set(handles.fixed_points_x2,'String','-');
-        set(handles.fixed_points_s3,'String','-'); set(handles.fixed_points_stability,'String','-');
-        set(handles.fixed_points_stability_rh,'String','-');
-        
+
         handles.plotsolution='time'; handles.plotdim='two';
         
         %Parameters
@@ -383,11 +367,7 @@ switch handles.motif_name
         set(handles.s3in_in,'enable','off'); set(handles.text48,'enable','off')
         set(handles.ks32_in,'enable','off','String',1e-6); set(handles.text81,'enable','off')
         set(handles.timeplot,'checked','on'); set(handles.phaseplot,'checked','off');
-        set(handles.fixed_points_s1,'String','-'); set(handles.fixed_points_x1,'String','-');
-        set(handles.fixed_points_s2,'String','-'); set(handles.fixed_points_x2,'String','-');
-        set(handles.fixed_points_s3,'String','-'); set(handles.fixed_points_stability,'String','-');
-        set(handles.fixed_points_stability_rh,'String','-');
-        
+
         handles.plotsolution='time'; handles.plotdim='two';
         
         %Parameters
@@ -471,11 +451,7 @@ switch handles.motif_name
         set(handles.s3in_in,'enable','on'); set(handles.text48,'enable','on')
         set(handles.ks32_in,'enable','off','String',1e-6); set(handles.text81,'enable','off')
         set(handles.timeplot,'checked','on'); set(handles.phaseplot,'checked','off');
-        set(handles.fixed_points_s1,'String','-'); set(handles.fixed_points_x1,'String','-');
-        set(handles.fixed_points_s2,'String','-'); set(handles.fixed_points_x2,'String','-');
-        set(handles.fixed_points_s3,'String','-'); set(handles.fixed_points_stability,'String','-');
-        set(handles.fixed_points_stability_rh,'String','-');
-        
+
         handles.plotsolution='time'; handles.plotdim='two';
         
         %Parameters
@@ -593,10 +569,7 @@ switch handles.motif_name
         set(handles.gamma2,'Enable','on','String',0.07069); 
 
         set(handles.timeplot,'checked','on'); set(handles.phaseplot,'checked','off')
-        set(handles.fixed_points_s1,'String','-'); set(handles.fixed_points_x1,'String','-')
-        set(handles.fixed_points_s2,'String','-'); set(handles.fixed_points_x2,'String','-')
-        set(handles.fixed_points_s3,'String','-'); set(handles.fixed_points_x3,'String','-')
-        set(handles.fixed_points_stability,'String','-'); set(handles.fixed_points_stability_rh,'String','-');
+
         handles.plotsolution='time'; handles.plotdim='two';
         
         set(handles.text14,'Enable','on');set(handles.text15,'Enable','on')

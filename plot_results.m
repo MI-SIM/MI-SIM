@@ -369,7 +369,6 @@ switch which_plot
                     list=hsv(z);
                     for i=1:z
                         plot(handles.trajectoryplot,fixed_numerical_n(i,indices_check(1)),fixed_numerical_n(i,indices_check(2)),'s','color',list(i,:),'MarkerFaceColor',list(i,:))
-                        eval(['set(handles.fp',num2str(i),',''ForegroundColor'',list(',num2str(i),',:));'])
                     end
                     %plot the trajectory
                     plot(handles.trajectoryplot,X_value,Y_value,'linewidth',2)
@@ -413,7 +412,6 @@ switch which_plot
                     list=hsv(z);
                     for i=1:z
                         plot3(handles.trajectoryplot,squeeze(fixed_numerical_n(i,indices_check(1))),squeeze(fixed_numerical_n(i,indices_check(2))),squeeze(fixed_numerical_n(i,indices_check(3))),'s','color',list(i,:),'MarkerFaceColor',list(i,:))
-                        eval(['set(handles.fp',num2str(i),',''ForegroundColor'',list(',num2str(i),',:));'])
                         hold on
                     end
                     %plot the trajectory
