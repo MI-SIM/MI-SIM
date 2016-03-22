@@ -6,7 +6,7 @@
 % email address: matthew.wade@ncl.ac.uk; dr.matthewwade@ncl.ac.uk
 % alternative contact: Dr. Nick Parker, nick.parker@ncl.ac.uk
 % Website: https://github.com/MI-SIM/MI-SIM
-% September 2015; Last revision: 19-Feb-2016
+% September 2015; Last revision: 11-Mar-2016
 
 if exist('handles.htxt')
     delete(handles.htxt)
@@ -31,7 +31,7 @@ end
 for kk=1:length(var_new_char)
     eqs=subs(eqs,char(var_new(kk)),subs(var_new_char(kk,:)));
 end
-var_order=strvcat('S1','X1','S2','X2','S3','X3');
+var_order=strvcat('S1','X1','S2','X2','S3','X3','S4','S5','S6');
 kj=1; ind=[];
 for k=1:length(sym_vars)
     if strmatch(char(sym_vars(k)),var_order)>0
@@ -76,7 +76,7 @@ try
 end
 axes(handles.txax)
 
-htxt=text(1.9,0.95,'Jacobian Sparsity Matrix','interpreter','latex','horiz','left','vert','middle','fontsize',12);
+htxt=text(1.9,0.96,'Jacobian Sparsity Matrix','interpreter','latex','horiz','left','vert','middle','fontsize',12);
 handles.htxt=htxt;
 if stabanaly==1 %Linear stability analysis
     for i=1:length(fixed_numerical1(:,1))
@@ -99,19 +99,20 @@ if stabanaly==1 %Linear stability analysis
         end
         
         %initial is the fixed point coordinates
-        if noeq ==3
-            initial=double([fixed_numerical1(i,1) fixed_numerical1(i,2) fixed_numerical1(i,3)]);
-            init = initial+[prt 0 prt];
-        elseif noeq==4
-            initial=double([fixed_numerical1(i,1) fixed_numerical1(i,2) fixed_numerical1(i,3) fixed_numerical1(i,4)]);
-            init = initial+[prt prt prt prt];
-        elseif noeq==5
-            initial=double([fixed_numerical1(i,1) fixed_numerical1(i,2) fixed_numerical1(i,3) fixed_numerical1(i,4) fixed_numerical1(i,5)]);
-            init = initial+[prt 0 prt 0 prt];
-        elseif noeq==6
-            initial=double([fixed_numerical1(i,1) fixed_numerical1(i,2) fixed_numerical1(i,3) fixed_numerical1(i,4) fixed_numerical1(i,5) fixed_numerical1(i,6)]);
-            init = initial+[prt prt prt prt prt prt];
+        initial=['double([']; pertb=['['];
+        
+        for k=1:noeq
+            initial=[initial,'fixed_numerical1(i,',num2str(k),') ']; 
+            pertb=[pertb,'prt '];
         end
+        
+        initial=[initial,']);'];
+        pertb=[pertb,'];'];
+        
+        initial=eval(initial);
+        pertb=eval(pertb);
+        
+        init=initial+pertb;
         
         solver=char(strtrim(solver));
         set(handles.func_prog,'String',['Running: Stability Analysis ',num2str(i)],'ForegroundColor','r')
@@ -119,9 +120,9 @@ if stabanaly==1 %Linear stability analysis
         h=handles.timestamp;
         h1=handles.progress;
         tt=time1;
-        flag=[];
+        flag=[];cno=[];
 
-        eval(['[~,yout2]=',solver,'(@model_gen, 0:0.01:time1, init, options, parameters,h,h1,gfnc,growth,motif,flag);']);
+        eval(['[~,yout2]=',solver,'(@model_gen, 0:stepsize:time1, init, options, parameters,h,h1,gfnc,growth,motif,flag,cno,handles.thermeqs,handles.gammas,handles.dG,init_out,handles);']);
 
         %calculate the difference between the trajectories
         dif1(:,i)=yout2(end,:)-initial;
@@ -149,10 +150,13 @@ if stabanaly2==1 %Routh-Hurwitz stability criterion
         jac_sysa=jac_sys;
         for kk=1:length(fixed_numerical1(i,:))
             var_n = fixed_numerical1(i,kk);
+            if var_n==0
+                var_n=1e-31;
+            end
             jac_sysa=subs(jac_sysa,cellstr(var_order1(kk,:)),subs(var_n));
             
         end
-        cpoly=charpoly(jac_sysa);
+        cpoly=charpoly(double(jac_sysa));
         eigen=roots(cpoly);
         if all(real(eigen)>0) && all(isreal(eigen))
             s2(:,i)={'Unstable node'};

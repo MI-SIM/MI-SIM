@@ -5,47 +5,50 @@
 % email address: matthew.wade@ncl.ac.uk; dr.matthewwade@ncl.ac.uk
 % alternative contact: Dr. Nick Parker, nick.parker@ncl.ac.uk
 % Website: https://github.com/MI-SIM/MI-SIM
-% September 2015; Last revision: 05-Jan-2016
+% September 2015; Last revision: 18-Mar-2016
 
 %Save GUI Figure to temp_fig
-fig_name=['temp_fig/',datestr(datetime),'_aaa_parameters.pdf'];
-
-%Create figure to display parameters etc
-f = figure('Units','characters',...
-    'Position',[0 0 150 60],...
-    'HandleVisibility','callback',...
-    'IntegerHandle','off',...
-    'Renderer','painters');
-
-mainPanel = uipanel('Units','characters',...
-    'Position',[0 10 90 50],...
-    'parent',f);
-botPanel = uipanel('BorderType','etchedin',...
-    'Units','characters',...
-    'Position',[0 0 150 10],...
-    'Parent',f);
-rightPanel = uipanel('BorderType','etchedin',...
-    'Units','characters',...
-    'Position',[90 10 60 50],...
-    'Parent',f);
-
-%Copy parameters
-axesobject_par1=copyobj(handles.values.Children,mainPanel);
-axesobject_fig1=copyobj(handles.motif_image,botPanel);
-set(axesobject_fig1,'Position',[0 0 1 1]);
-panax1 = axes('Units','normal', 'Position', [0 0 1 1], 'Parent', rightPanel);
-set(gca,'Visible','off')
-text(0.2,0.8,'MI-Sim Report','fontsize',24)
-text(0.2,0.7,datestr(datetime),'fontsize',20)
-text(0,0.6,'Equations','fontsize',24)
-text(0,0.4,handles.eqtx,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
-text(0,0.2,handles.fnctext,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
-
-opts.Width = 20;
-opts.Height = 20;
-opts.format = 'pdf';
-hgexport(f, fig_name, opts);
-close(f)
+if handles.gui_front==0
+    fig_name=['temp_fig/',datestr(datetime),'_aaa_parameters.pdf'];
+    warning off
+    %Create figure to display parameters etc
+    f = figure('Units','characters',...
+        'Position',[0 0 150 60],...
+        'HandleVisibility','callback',...
+        'IntegerHandle','off',...
+        'Renderer','painters');
+    
+    mainPanel = uipanel('Units','characters',...
+        'Position',[0 10 90 50],...
+        'parent',f);
+    botPanel = uipanel('BorderType','etchedin',...
+        'Units','characters',...
+        'Position',[0 0 150 10],...
+        'Parent',f);
+    rightPanel = uipanel('BorderType','etchedin',...
+        'Units','characters',...
+        'Position',[90 10 60 50],...
+        'Parent',f);
+    
+    %Copy parameters
+    axesobject_par1=copyobj(handles.values.Children,mainPanel);
+    axesobject_fig1=copyobj(handles.motif_image,botPanel);
+    set(axesobject_fig1,'Position',[0 0 1 1]);
+    panax1 = axes('Units','normal', 'Position', [0 0 1 1], 'Parent', rightPanel);
+    set(gca,'Visible','off')
+    text(0.2,0.8,'MI-Sim Report','fontsize',24)
+    text(0.2,0.7,datestr(datetime),'fontsize',20)
+    text(0,0.6,'Equations','fontsize',24)
+    text(0,0.4,handles.eqtx,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
+    text(0,0.2,handles.fnctext,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
+    
+    opts.Width = 20;
+    opts.Height = 20;
+    opts.format = 'pdf';
+    hgexport(f, fig_name, opts);
+    close(f)
+    handles.gui_front==1;
+end
 yout=handles.yout;
 tout=handles.tout;
 fixed_numerical=handles.fn;
@@ -61,8 +64,11 @@ s2_check=get(handles.s2_check,'Value');
 x2_check=get(handles.x2_check,'Value');
 s3_check=get(handles.s3_check,'Value');
 x3_check=get(handles.x3_check,'Value');
-labels={'s1','x1','s2','x2','s3','x3'};
-checkind=[s1_check,x1_check,s2_check,x2_check,s3_check,x3_check];
+s4_check=get(handles.s4_check,'Value');
+s5_check=get(handles.s5_check,'Value');
+s6_check=get(handles.s6_check,'Value');
+labels=handles.var_names;
+checkind=[s1_check,x1_check,s2_check,x2_check,s3_check,x3_check,s4_check,s5_check,s6_check];
 fullcheck=sum(checkind);
 indices_check = find(checkind);
 checkenb=[];
@@ -96,7 +102,21 @@ if strcmp(get(handles.x3_check,'Enable'),'on')
 else
     checkenb=[checkenb,0];
 end
-
+if strcmp(get(handles.s4_check,'Enable'),'on')
+    checkenb=[checkenb,1];
+else
+    checkenb=[checkenb,0];
+end
+if strcmp(get(handles.s5_check,'Enable'),'on')
+    checkenb=[checkenb,1];
+else
+    checkenb=[checkenb,0];
+end
+if strcmp(get(handles.s6_check,'Enable'),'on')
+    checkenb=[checkenb,1];
+else
+    checkenb=[checkenb,0];
+end
 ly=length(yout);
 [lfn,sfn]=size(fixed_numerical);
 kk=1;
@@ -133,42 +153,63 @@ switch which_plot
                     hold on
                     plot(handles.solutionplot,tout,yout_n(:,1),'linewidth',2,'color','b')
                     hold off
-                    legd=[legd,{'S1'}];
+                    legd=[legd;{'S1'}];
                 else
                 end
                 if x1_check==1
                     hold on
                     plot(handles.solutionplot,tout,yout_n(:,2),'linewidth',2,'color','r')
                     hold off
-                    legd=[legd,{'X1'}];
+                    legd=[legd;{'X1'}];
                 else
                 end
                 if s2_check==1
                     hold on
                     plot(handles.solutionplot,tout,yout_n(:,3),'linewidth',2,'color',[0 0.5 0])
                     hold off
-                    legd=[legd,{'S2'}];
+                    legd=[legd;{'S2'}];
                 else
                 end
                 if x2_check==1
                     hold on
                     plot(handles.solutionplot,tout,yout_n(:,4),'linewidth',2,'color',[1 0.6 0])
                     hold off
-                    legd=[legd,{'X2'}];
+                    legd=[legd;{'X2'}];
                 else
                 end
                 if s3_check==1
                     hold on
                     plot(handles.solutionplot,tout,yout_n(:,5),'linewidth',2,'color',[0.5 0 0.5])
                     hold off
-                    legd=[legd,{'S3'}];
+                    legd=[legd;handles.var_names(5,:)];
                 else
                 end
                 if x3_check==1
                     hold on
                     plot(handles.solutionplot,tout,yout_n(:,6),'linewidth',2,'color',[0.302 0.745 0.933])
                     hold off
-                    legd=[legd,{'X3'}];
+                    legd=[legd;handles.var_names(6,:)];
+                else
+                end
+                if s4_check==1
+                    hold on
+                    plot(handles.solutionplot,tout,yout_n(:,7),'linewidth',2,'color',[0 1 1])
+                    hold off
+                    legd=[legd;handles.var_names(7,:)];
+                else
+                end
+                if s5_check==1
+                    hold on
+                    plot(handles.solutionplot,tout,yout_n(:,8),'linewidth',2,'color',[1 0.6 0.784])
+                    hold off
+                    legd=[legd;handles.var_names(8,:)];
+                else
+                end
+                if s6_check==1
+                    hold on
+                    plot(handles.solutionplot,tout,yout_n(:,9),'linewidth',2,'color',[0.314 0.314 0.314])
+                    hold off
+                    legd=[legd;handles.var_names(9,:)];
                 else
                 end
                 hold on
@@ -186,6 +227,53 @@ switch which_plot
                 axesobject_a=copyobj([handles.legend1,handles.solutionplot],newfig_a);
                 hgexport(newfig_a, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
                 close(newfig_a)
+                
+            case 'deltaG'
+                warning off
+                axes(handles.solutionplot);
+                %reset the plot
+                cla reset
+                
+                plot(handles.tout,handles.dG0_out,'linewidth',2,'color','r')
+                hold on
+                zr=zeros(1,length(handles.tout));
+                plot(handles.tout,zr,'k--')
+                xlabel('Time (days)')
+                ylabel('\Delta G (kJ/mol)')
+                
+                %Save Figure to temp_fig
+                fig_name=['temp_fig/',datestr(datetime),'_deltaG_plot.pdf'];
+                newfig_a=figure;
+                axesobject_a=copyobj([handles.solutionplot],newfig_a);
+                hgexport(newfig_a, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
+                close(newfig_a)
+                
+            case 'inhibition'
+                warning off
+                axes(handles.solutionplot);
+                %reset the plot
+                cla reset
+                
+                plot(handles.tout,handles.I20,'linewidth',2,'color',[0.6 0.2 0.4])
+                yl=get(gca,'YLim');
+                if max(real(handles.I20))<0
+                    mi20=min(real(handles.I20));
+                    ma20=0;
+                else
+                    mi20=0;
+                    ma20=max(real(handles.I20));
+                end
+                set(gca,'YLim',[mi20 ma20])
+                xlabel('Time (days)')
+                ylabel('Inhibition function')
+                axis tight
+                %Save Figure to temp_fig
+                fig_name=['temp_fig/',datestr(datetime),'_inhibtion_plot.pdf'];
+                newfig_a=figure;
+                axesobject_a=copyobj([handles.solutionplot],newfig_a);
+                hgexport(newfig_a, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
+                close(newfig_a)
+                
             case 'phase' %Phase plot
                 
                 axes(handles.solutionplot);
@@ -195,7 +283,7 @@ switch which_plot
                 if fullcheck == 0 || fullcheck == 1
                     msgbox('Too few variables selected, please select 2 or 3 variables','Error','error')
                     return
-                elseif fullcheck == 4
+                elseif fullcheck > 3
                     msgbox('Too many variables selected, please select 2 or 3 variables','Error','error')
                     return
                 elseif fullcheck == 2
@@ -216,7 +304,7 @@ switch which_plot
                 fig_name=['temp_fig/',datestr(datetime),'_phase_plot.pdf'];
                 newfig_a=figure;
                 axesobject_a=copyobj(handles.solutionplot,newfig_a);
-                hgexport(handles.solutionplot, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
+                hgexport(newfig_a, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
                 close(newfig_a)
             case 'subp' %Subplotting each variable separately
                 
@@ -227,18 +315,14 @@ switch which_plot
                 end
                 nstat=get(handles.normeig,'Value');
 
-                chk=[s1_check,x1_check,s2_check,x2_check,s3_check,x3_check];
-                vars={'S1','X1','S2','X2','S3','X3'};
+                chk=[s1_check,x1_check,s2_check,x2_check,s3_check,x3_check,s4_check,s5_check,s6_check];
+                vars=handles.var_names;
                 vc=vars(find(chk));
                 
                 N = sum(chk);
                 
-                if N == 3 || N == 4
-                    sa = 2; sb=2;
-                    
-                elseif N == 5 || N ==6
-                    sa = 3; sb=2;
-                end
+                sa=ceil(N/2); sb=2;
+
                 list=lines(6);
                 if handles.clcyc>6
                     list=lines(handles.clcyc);
@@ -284,7 +368,7 @@ switch which_plot
                 fig_name=['temp_fig/',datestr(datetime),'_subplot_plot.pdf'];
                 newfig_a=figure;
                 axesobject_a=copyobj(handles.solutionplot,newfig_a);
-                hgexport(handles.solutionplot, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
+                hgexport(newfig_a, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
                 close(newfig_a)
             case 'eig' %Eigenvalue plot
                 axes(handles.solutionplot);
@@ -335,7 +419,7 @@ switch which_plot
                 fig_name=['temp_fig/',datestr(datetime),'_eigenvalue_plot.pdf'];
                 newfig_a=figure;
                 axesobject_a=copyobj(handles.solutionplot,newfig_a);
-                hgexport(handles.solutionplot, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
+                hgexport(newfig_a, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
                 close(newfig_a)
         end
 
@@ -357,7 +441,7 @@ switch which_plot
                 end
                 
                 %Check correct number of variables are selected
-                if fullcheck == 0 || fullcheck == 1 || fullcheck == 3 || fullcheck == 4 || fullcheck==5
+                if fullcheck ~=2
                     msgbox('Too few variables selected, please select 2 variables','Error','error')
                     return
                 else
@@ -386,7 +470,7 @@ switch which_plot
                 fig_name=['temp_fig/',datestr(datetime),'_2d_trajectory_plot.pdf'];
                 newfig_a=figure;
                 axesobject_a=copyobj(handles.trajectoryplot,newfig_a);
-                hgexport(handles.trajectoryplot, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
+                hgexport(newfig_a, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
                 close(newfig_a)
             case 'three' %3D plot
                 %if user wants to overlay multiple trajectories onto the plot of
@@ -399,7 +483,7 @@ switch which_plot
                 end
                 
                 %Check correct number of variables are selected
-                if fullcheck == 0 || fullcheck == 1 || fullcheck == 2 || fullcheck == 4 || fullcheck == 5
+                if fullcheck ~=3
                     msgbox('Too few variables selected, please select 3 variables','Error','error')
                     return
                 else
@@ -432,7 +516,7 @@ switch which_plot
                 fig_name=['temp_fig/',datestr(datetime),'_3d_trajectory_plot.pdf'];
                 newfig_a=figure;
                 axesobject_a=copyobj(handles.trajectoryplot,newfig_a);
-                hgexport(handles.trajectoryplot, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
+                hgexport(newfig_a, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
                 close(newfig_a)
         end
         

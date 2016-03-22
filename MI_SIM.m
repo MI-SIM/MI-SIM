@@ -22,7 +22,7 @@ function varargout = MI_SIM(varargin)
 
 % Edit the above text to modify the response to help MI_SIM
 
-% Last Modified by GUIDE v2.5 01-Mar-2016 13:05:07
+% Last Modified by GUIDE v2.5 11-Mar-2016 15:04:19
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -68,7 +68,8 @@ set(handles.overlay,'enable','off')
 set(handles.solver,'Value',3);
 set(handles.abstol,'String','1e-8');
 set(handles.reltol,'String','1e-8');
-set(handles.error_val,'String','1e-4');
+set(handles.step_size,'String','0.01');
+set(handles.error_val,'String','1e-6');
 set(handles.pert_p,'String','0.0001');
 set(handles.func_prog,'String','');
 set(handles.lsanaly,'Value',1,'ForegroundColor',[0.078, 0.169, 0.549])
@@ -81,8 +82,20 @@ set(handles.colormp,'Visible','off');
 set(handles.normeig,'Visible','off','Value',0)
 set(handles.infotable,'Visible','off')
 set(handles.stabtable,'Visible','off')
+set(handles.gamma3,'Visible','off','enable','off'); set(handles.gam_text3,'Visible','off','enable','off')
+set(handles.gamma4,'Visible','off','enable','off'); set(handles.gam_text4,'Visible','off','enable','off')
+set(handles.gamma5,'Visible','off','enable','off'); set(handles.gam_text5,'Visible','off','enable','off')
+set(handles.gamma6,'Visible','off','enable','off'); set(handles.gam_text6,'Visible','off','enable','off')
+
+set(handles.furth_plots,'Visible','off')
 handles.simtype='single_p';
 handles.growthmodel='Monod';
+handles.gui_front=0;
+%For thermodynamics
+handles.gammas=[];
+handles.thermeqs=[];
+handles.dG=[];
+handles.Temperature=[];
 dir_rep=dir('Reports');
 
 if length(dir_rep)<5
@@ -101,7 +114,7 @@ handles.clcyc=1;
 
 %List of Existing Growth Models
 Exist_Models=[{'Commensalism'};{'Competition'};{'Predation'};{'No_interaction'};{'Cooperation'};{'Amensalism'};{'Threespecies'}];
-Exist_Gmodels=[{'Monod'};{'Contois'};{'Tessier'};{'Moser'};{'Logistic'};{'Andrews'};{'Thermodynamic'}];
+Exist_Gmodels=[{'Monod'};{'Contois'};{'Tessier'};{'Moser'};{'Haldane'};{'Andrews'};{'Thermodynamic'}];
 if ~isempty(varargin)
     %Check valid model
     if numel(varargin)==2
@@ -134,8 +147,11 @@ if ~isempty(varargin)
 else
     handles.motif_name='Syntrophy';
 end
-
-handles=model_sel(handles);
+try
+    handles=model_sel(handles);
+catch
+    return
+end
 
 % Choose default command line output for MI_SIM
 handles.output = hObject;
@@ -149,8 +165,11 @@ guidata(hObject, handles);
 
 % --- Outputs from this function are returned to the command line.
 function varargout = MI_SIM_OutputFcn(hObject, eventdata, handles)
-varargout{1} = handles.output;
-
+try
+    varargout{1} = handles.output;
+catch
+    return
+end
 
 function x1_init_Callback(hObject, eventdata, handles)
 X1_init=str2double(get(hObject,'String'));
@@ -209,6 +228,33 @@ X3_init=str2double(get(hObject,'String'));
 
 % --- Executes during object creation, after setting all properties.
 function x3_init_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+function s4_init_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function s4_init_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+function s5_init_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function s5_init_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+function s6_init_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function s6_init_CreateFcn(hObject, eventdata, handles)
 
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
@@ -480,6 +526,48 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+function gamma3_Callback(hObject, eventdata, handles)
+gamma3=str2double(get(hObject,'String'));
+
+% --- Executes during object creation, after setting all properties.
+function gamma3_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+function gamma4_Callback(hObject, eventdata, handles)
+gamma4=str2double(get(hObject,'String'));
+
+% --- Executes during object creation, after setting all properties.
+function gamma4_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+function gamma5_Callback(hObject, eventdata, handles)
+gamma5=str2double(get(hObject,'String'));
+
+% --- Executes during object creation, after setting all properties.
+function gamma5_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+function gamma6_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function gamma6_CreateFcn(hObject, eventdata, handles)
+gamma6=str2double(get(hObject,'String'));
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
 % --- Executes on selection change in solver.
 function solver_Callback(hObject, eventdata, handles)
 solvstr=get(hObject,'String');
@@ -538,6 +626,17 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+
+function step_size_Callback(hObject, eventdata, handles)
+stepsize=str2double(get(hObject,'string'));
+
+% --- Executes during object creation, after setting all properties.
+function step_size_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
 % --- Executes on button press in plot_button2.
 function plot_button2_Callback(hObject, eventdata, handles)
 which_plot='traj';
@@ -570,6 +669,18 @@ s3_check=get(hObject,'Value');
 % --- Executes on button press in x3_check.
 function x3_check_Callback(hObject, eventdata, handles)
 x3_check=get(hObject,'Value');
+
+% --- Executes on button press in s4_check.
+function s4_check_Callback(hObject, eventdata, handles)
+s4_check=get(hObject,'Value');
+
+% --- Executes on button press in s5_check.
+function s5_check_Callback(hObject, eventdata, handles)
+s5_check=get(hObject,'Value');
+
+% --- Executes on button press in s6_check.
+function s6_check_Callback(hObject, eventdata, handles)
+s6_check=get(hObject,'Value');
 
 % --- Executes on button press in overlay.
 function overlay_Callback(hObject, eventdata, handles)
@@ -807,6 +918,30 @@ if X3_init<0 || isnumeric(X3_init)==0
 else
 end
 
+S4_init=str2double(get(handles.s4_init,'String'));
+if S4_init<0 || isnumeric(S4_init)==0
+    set(handles.s4_init,'String',0.1);
+    S4_init=str2double(get(handles.s4_init,'String'));
+    msgbox('The value entered for S4_init was not valid so the default value was reset','Error','error')
+else
+end
+
+S5_init=str2double(get(handles.s5_init,'String'));
+if S5_init<0 || isnumeric(S3_init)==0
+    set(handles.s5_init,'String',0.1);
+    S5_init=str2double(get(handles.s5_init,'String'));
+    msgbox('The value entered for S5_init was not valid so the default value was reset','Error','error')
+else
+end
+
+S6_init=str2double(get(handles.s6_init,'String'));
+if S6_init<0 || isnumeric(S6_init)==0
+    set(handles.s6_init,'String',0.1);
+    S6_init=str2double(get(handles.s6_init,'String'));
+    msgbox('The value entered for S6_init was not valid so the default value was reset','Error','error')
+else
+end
+
 abstol=str2double(get(handles.abstol,'String'));
 if abstol<0 || isnumeric(abstol)==0
     set(handles.abstol,'String',1e-8);
@@ -823,6 +958,14 @@ if reltol<0 || isnumeric(reltol)==0
 else
 end
 
+stepsize=str2double(get(handles.step_size,'String'));
+if stepsize<0 || isnumeric(stepsize)==0
+    set(handles.step_size,'String',0.01);
+    stepsize=str2double(get(handles.step_size,'String'));
+    msgbox('The value entered for step size was not valid so the default value was reset','Error','error')
+else
+end
+
 solvstr=get(handles.solver,'String');
 solvnum=get(handles.solver,'Value');
 if solvnum==1
@@ -836,6 +979,9 @@ s2_check=get(handles.s2_check,'Value');
 x2_check=get(handles.x2_check,'Value');
 s3_check=get(handles.s3_check,'Value');
 x3_check=get(handles.x3_check,'Value');
+s4_check=get(handles.s4_check,'Value');
+s5_check=get(handles.s5_check,'Value');
+s6_check=get(handles.s6_check,'Value');
 
 run_script_gui;
 
@@ -935,6 +1081,9 @@ set(handles.s2_check,'value',0)
 set(handles.x2_check,'value',0)
 set(handles.s3_check,'value',0)
 set(handles.x3_check,'value',0)
+set(handles.s4_check,'value',0)
+set(handles.s5_check,'value',0)
+set(handles.s6_check,'value',0)
 guidata(hObject,handles)
 
 % --------------------------------------------------------------------
@@ -947,6 +1096,9 @@ set(handles.s2_check,'value',1)
 set(handles.x2_check,'value',0)
 set(handles.s3_check,'value',0)
 set(handles.x3_check,'value',0)
+set(handles.s4_check,'value',0)
+set(handles.s5_check,'value',0)
+set(handles.s6_check,'value',0)
 
 guidata(hObject,handles)
 
@@ -992,6 +1144,8 @@ set(handles.sol_disp,'String','Eigenvalues')
 set(handles.s1_check,'Value',0,'Enable','off'); set(handles.x1_check,'Value',0,'Enable','off')
 set(handles.s2_check,'Value',0,'Enable','off'); set(handles.x2_check,'Value',0,'Enable','off')
 set(handles.s3_check,'Value',0,'Enable','off'); set(handles.x3_check,'Value',0,'Enable','off')
+set(handles.s4_check,'Value',0,'Enable','off'); set(handles.s5_check,'Value',0,'Enable','off');
+set(handles.s6_check,'Value',0,'Enable','off');
 set(handles.normeig,'Visible','on','Value',0,'String','Normalise')
 guidata(hObject,handles)
 
@@ -1057,6 +1211,7 @@ set(handles.use_3v,'Visible','off','Value',0);
 set(handles.uipanel6,'Title','Plot of trajector from initial conditions'); set(handles.overlay,'enable','off')
 set(handles.twodphase,'Enable','off'); set(handles.threedphase,'Enable','off')
 set(handles.colormp,'Visible','off')
+set(handles.furth_plots,'Visible','on')
 handles.simtype='single_p';
 
 guidata(hObject,handles)
@@ -1077,6 +1232,7 @@ set(handles.use_3v,'Visible','off','Value',0);
 set(handles.uipanel6,'Title','Bifurcation phase plot'); set(handles.overlay,'enable','off')
 set(handles.twodphase,'Enable','off'); set(handles.threedphase,'Enable','off')
 handles.simtype='multiple_p';
+set(handles.furth_plots,'Visible','off')
 guidata(hObject,handles)
 
 % --------------------------------------------------------------------
@@ -1095,6 +1251,7 @@ set(handles.min_txt,'Visible','on','Enable','on','String','Lower Limit'); set(ha
 set(handles.use_3v,'Visible','off','Value',0);
 set(handles.uipanel6,'Title','Basin of Attraction'); set(handles.overlay,'enable','off')
 set(handles.twodphase,'Enable','off'); set(handles.threedphase,'Enable','off')
+set(handles.furth_plots,'Visible','off')
 handles.simtype='boa';
 
 guidata(hObject,handles)
@@ -1115,6 +1272,7 @@ set(handles.use_3v,'Visible','on','Value',0);
 set(handles.uipanel6,'Title','Phase Portrait'); set(handles.overlay,'enable','off')
 set(handles.twodphase,'Enable','off'); set(handles.threedphase,'Enable','off')
 set(handles.colormp,'Visible','off')
+set(handles.furth_plots,'Visible','off')
 handles.simtype='pport';
 
 guidata(hObject,handles)
@@ -1153,13 +1311,21 @@ set(handles.n3_in,'String',2);
 set(handles.gamma0,'String',0.43);
 set(handles.gamma1,'String',0.1429);
 set(handles.gamma2,'String',0.0769);
+set(handles.gamma3,'String','','Visible','off')
+set(handles.gamma4,'String','','Visible','off')
+set(handles.gamma5,'String','','Visible','off')
+set(handles.gamma6,'String','','Visible','off')
 set(handles.ks32_in,'String',1e-6);
 set(handles.abstol,'String',1e-8);
 set(handles.reltol,'String',1e-8);
-set(handles.error_val,'String','1e-4');
+set(handles.error_val,'String','1e-6');
+set(handles.step_size,'String','0.01');
 set(handles.solver,'value',3);
 set(handles.pert_p,'value',0.00001);
 set(handles.normeig,'Visible','off','Value',0)
+handles.gui_front=0;
+
+guidata(hObject,handles)
 
 
 % --------------------------------------------------------------------
@@ -1345,7 +1511,7 @@ if ~isempty(handles.yout_phase)
     fig_name=['temp_fig/',datestr(datetime),'_phase2D_plot.pdf'];
     newfig_a=figure;
     axesobject_a=copyobj(handles.trajectoryplot,newfig_a);
-    hgexport(handles.trajectoryplot, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
+    hgexport(newfig_a, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
     close(newfig_a)
 end
 
@@ -1370,7 +1536,7 @@ if ~isempty(handles.yout_phase)
     fig_name=['temp_fig/',datestr(datetime),'_phase3D_plot.pdf'];
     newfig_a=figure;
     axesobject_a=copyobj(handles.trajectoryplot,newfig_a);
-    hgexport(handles.trajectoryplot, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
+    hgexport(newfig_a, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
     close(newfig_a)
 end
 
@@ -1510,4 +1676,30 @@ elseif ~isempty(strem) && isempty(strserv) && strfind(strem,'@')==1
     msgbox('Enter valid server address','Error: No valid e-mail');
 else
     msgbox('Enter valid e-mail and server address','Error: No valid e-mail');
+end
+
+
+% --- Executes on selection change in furth_plots.
+function furth_plots_Callback(hObject, eventdata, handles)
+which_plot='sol';
+wp=get(handles.furth_plots,'Value');
+wps=get(handles.furth_plots,'String');
+wp_s=strtrim(wps(wp,:));
+
+switch wp_s
+    case {'Plots...','Solutions'}
+    handles.plotsolution='time';
+    case {'deltaG'}
+    handles.plotsolution='deltaG';
+    case {'Inhibition function'}
+    handles.plotsolution='inhibition';
+end
+plot_results;
+
+
+% --- Executes during object creation, after setting all properties.
+function furth_plots_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
 end

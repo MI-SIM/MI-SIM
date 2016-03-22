@@ -1,4 +1,4 @@
-function dP=model_gen(time, init, parameters,h,h1,gfnc,growth,motif,flag,cno)
+function [dP]=model_gen(time, init, parameters,h,h1,gfnc,growth,motif,flag,cno,thermeqs,gammas,dG,init_out,handles)
 %four_mod - calls motif function to be solved with the ODE solver
 %
 % Author: Dr. Matthew Wade, School of Civil Engineering & Geosciences
@@ -6,7 +6,7 @@ function dP=model_gen(time, init, parameters,h,h1,gfnc,growth,motif,flag,cno)
 % email address: matthew.wade@ncl.ac.uk; dr.matthewwade@ncl.ac.uk
 % alternative contact: Dr. Nick Parker, nick.parker@ncl.ac.uk
 % Website: https://github.com/MI-SIM/MI-SIM
-% September 2015; Last revision: 29-Feb-2016
+% September 2015; Last revision: 11-Mar-2016
 
 %Deal parameters
 km1=parameters(1);
@@ -36,9 +36,11 @@ switch growth
         n1=parameters(23);
         n2=parameters(24);
         n3=parameters(25);
+    case {'Thermodynamic'}
+        for k=1:length(gammas)
+           eval(['gamma',num2str(2+k),'=gammas(',num2str(k),');']) 
+        end
 end
-
-
 
 %Take the substrate and biomass values at each time point
 outsiz=length(init);
@@ -46,22 +48,19 @@ S1=init(1);
 X1=init(2);
 S2=S1; 
 I2=1; %Default inhibition term
+I20=0;
+dG0=0;
+R=8.3144598/1000;
+T=handles.Temperature;
 
 %Set initial conditions dependent on motif chosen
-if outsiz==3
-    X2=init(3);
-elseif outsiz==4
-    S2=init(3);
-    X2=init(4);
-elseif outsiz==5
-    S2=init(3);
-    X2=init(4);
-    S3=init(5);
-elseif outsiz==6
-    S2=init(3);
-    X2=init(4);
-    S3=init(5);
-    X3=init(6);
+try
+    eval(init_out);
+catch
+    for k=1:outsiz
+        eval([sprintf(handles.sc{k}) '=init(k);'])
+
+    end
 end
 
 %Evaluate growth function (symbolic -> numeric)
@@ -78,12 +77,14 @@ switch motif
         eq3=-D*S2+gamma0*(1-Y1)*f1*X1-f2*X2;
         eq4=-D*X2+Y2*f2*X2-kdec2*X2;
         eq5=[]; eq6=[];
+        dP=[eq1;eq2;eq3;eq4;eq5;eq6];
     case 'sc'
         f1=gnum(1); f2=gnum(2);
         eq1=D*(S1in-S1)-f1*X1-f1*X2;
         eq2=-D*X1+Y1*f1*X1-kdec1*X1; 
         eq3=-D*X2+Y2*f2*X2-kdec2*X2;
         eq4=[]; eq5=[]; eq6=[];
+        dP=[eq1;eq2;eq3;eq4;eq5;eq6];
     case 'fci'
         f1=gnum(1); f2=gnum(2);
         I3=gnum(3);
@@ -93,6 +94,7 @@ switch motif
         eq4=-D*X2+Y2*f2*X2-kdec2*X2;
         eq5=-D*S3+f2*X2; 
         eq6=[];
+        dP=[eq1;eq2;eq3;eq4;eq5;eq6];
     case 'ni'
         f1=gnum(1); f2=gnum(2);
         eq1=D*(S1in-S1)-f1*X1;
@@ -100,14 +102,40 @@ switch motif
         eq3=D*(S2in-S2)-f2*X2;
         eq4=-D*X2+Y2*f2*X2-kdec2*X2;
         eq5=[]; eq6=[];
+        dP=[eq1;eq2;eq3;eq4;eq5;eq6];
     case 'syn'
-        f1=gnum(1); f2=gnum(2);
-        I2=gnum(3);
+        f1=gnum(1); f2=gnum(2); I2=gnum(3);
+        switch growth
+            case 'Thermodynamic'
+                try
+                    I2 = 1-exp(eval(dG)/(R*T));
+                catch
+                    I2=1-exp(eval(dG/(R*T)));
+                end
+                dG0=eval(dG);
+                I20=I2;
+        end
+
         eq1=D*(S1in-S1)-f1*X1*I2;
         eq2=-D*X1+Y1*f1*X1*I2-kdec1*X1;
         eq3=-D*S2+gamma0*(1-Y1)*f1*X1*I2-f2*X2;
         eq4=-D*X2+Y2*f2*X2-kdec2*X2;
         eq5=[]; eq6=[];
+        dP=[eq1;eq2;eq3;eq4;eq5;eq6];
+        switch growth
+            case 'Thermodynamic'
+                dP=[eq1;eq2;eq3;eq4];
+                for k=1:length(thermeqs)
+                    eval(['eq',num2str(4+k),'=thermeqs{',num2str(k),'};'])
+                    try
+                        dP=[dP;eval(['eq',num2str(4+k)])];
+                    catch
+                        dP=[dP;['eq',num2str(4+k)]];
+                    end
+                end
+                dP=eval(dP);
+        end
+        
     case 'pi'
         f1=gnum(1); f2=gnum(2); f3=gnum(3);
         I4 = gnum(4);
@@ -117,15 +145,42 @@ switch motif
         eq4=-D*X2+Y3*f3*X2*I4-kdec2*X2;
         eq5=D*(S3in-S3)-f3*X2*I4; 
         eq6=[];
+        dP=[eq1;eq2;eq3;eq4;eq5;eq6];
     case 'ths'
         f1=gnum(1); f2=gnum(2); f3=gnum(3);
-        I2=gnum(4);
+        I2=gnum(4); 
+        
+        switch growth
+            case 'Thermodynamic'
+                try
+                    I2 = 1-exp(dG/(R*T));
+                catch
+                    I2=1-exp(eval(dG/(R*T)));
+                end
+                dG0=eval(dG);
+                I20=I2;
+        end
+        
         eq1=D*(S1in-S1)-f1*X1;
         eq2=-D*X1+Y1*f1*X1-kdec1*X1;
         eq3=D*(S2in-S2)+gamma0*(1-Y1)*f1*X1-f2*X2*I2;
         eq4=-D*X2+Y2*f2*X2*I2-kdec2*X2;
         eq5=D*(S3in-S3)+gamma1*(1-Y2)*f2*X2*I2-f3*X3-gamma2*f1*X1; 
         eq6=-D*X3+Y3*f3*X3-kdec3*X3;
+        dP=[eq1;eq2;eq3;eq4;eq5;eq6];
+        switch growth
+            case 'Thermodynamic'
+                dP=[eq1;eq2;eq3;eq4;eq5;eq6];
+                for k=1:length(thermeqs)
+                    eval(['eq',num2str(6+k),'=thermeqs(',num2str(k),');'])
+                    try
+                        dP=[dP;eval(['eq',num2str(6+k)])];
+                    catch
+                        dP=[dP;['eq',num2str(6+k)]];
+                    end
+                end
+                dP=eval(dP);
+        end
 end
 
 %Update solver progress according to routine run
@@ -159,7 +214,6 @@ else
 end
 drawnow
 
-%Concatenate equations as output
-dP=[eq1;eq2;eq3;eq4;eq5;eq6];
+
 
 
