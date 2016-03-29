@@ -58,8 +58,7 @@ try
     eval(init_out);
 catch
     for k=1:outsiz
-        eval([sprintf(handles.sc{k}) '=init(k);'])
-
+        eval([sprintf(handles.var_names(k,:)) '=init(k);'])
     end
 end
 
@@ -153,9 +152,9 @@ switch motif
         switch growth
             case 'Thermodynamic'
                 try
-                    I2 = 1-exp(dG/(R*T));
-                catch
                     I2=1-exp(eval(dG/(R*T)));
+                catch
+                    I2 = 1-exp(eval(dG)/(R*T));
                 end
                 dG0=eval(dG);
                 I20=I2;
@@ -174,12 +173,17 @@ switch motif
                 for k=1:length(thermeqs)
                     eval(['eq',num2str(6+k),'=thermeqs(',num2str(k),');'])
                     try
-                        dP=[dP;eval(['eq',num2str(6+k)])];
+                        dP=[dP;eval(eval(['eq',num2str(6+k),'{1}']))];
                     catch
-                        dP=[dP;['eq',num2str(6+k)]];
+                        try
+                            dP=[dP;eval(['eq',num2str(6+k)])];
+                        catch
+                            dP=[dP;['eq',num2str(6+k)]];
+                        end
+                        dP=eval(dP);
                     end
                 end
-                dP=eval(dP);
+                
         end
 end
 

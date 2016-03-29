@@ -264,7 +264,8 @@ end
 function growthmenu_Callback(hObject, eventdata, handles)
 contents = cellstr(get(hObject,'String'));
 handles.growthmodel=contents{get(hObject,'Value')};
-model_sel(handles);
+
+handles=model_sel(handles);
 
 guidata(hObject,handles)
 

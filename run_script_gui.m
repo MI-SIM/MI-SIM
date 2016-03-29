@@ -735,7 +735,7 @@ switch handles.simtype
         axes(handles.stabmatrix)
         [nm,nt]=size(sm);
         yn=ones(1,nt);
-        xn=0;
+        xn=0.5;
         for j=1:nt
             xx(j)=(xn-0.16)+0.16;
             xn=xn+0.16;
@@ -757,6 +757,7 @@ switch handles.simtype
         SsN(SsN=='U')='2'; UsN(UsN=='U')='2';
         
         SsNu=str2num(SsN); UsNu=str2num(UsN);
+        
         %Reshape and transpose
         SsNk=reshape(SsNu,rS,cS); UsNk=reshape(UsNu,rU,cU);
         SsNr=SsNk'; UsNr=UsNk';
@@ -777,22 +778,22 @@ switch handles.simtype
         
         set(handles.func_prog,'String','Completed: Multiple operating points','ForegroundColor',[0 0.6 1])
         guidata(hObject,handles);
-  
-
-%Save Figure to temp_fig
-fig_name=['temp_fig/',datestr(datetime),'_bifurcation_plot.pdf'];
-newfig_a=figure;
-axesobject_a=copyobj(handles.trajectoryplot,newfig_a);
-hgexport(newfig_a, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
-close(newfig_a)
-case 'boa'
-    basin_of_attraction;
-    
+        
+        
+        %Save Figure to temp_fig
+        fig_name=['temp_fig/',datestr(datetime),'_bifurcation_plot.pdf'];
+        newfig_a=figure;
+        axesobject_a=copyobj(handles.trajectoryplot,newfig_a);
+        hgexport(newfig_a, fig_name, hgexport('factorystyle'), 'Format', 'pdf');
+        close(newfig_a)
+    case 'boa'
+        basin_of_attraction;
+        
     case 'pport'
-        variables=set_variables(growth);
+        variables=set_variables(growth,handles.gammas);
+        parameters=eval(variables);
         out_x_end=[]; out_y_end=[]; out_z_end=[];
         xlns=[]; ylns=[]; zlns=[]; out_x=[]; out_y=[]; out_z=[];
-        parameters=[km1 Y1 kdec1 km2 Y2 kdec2 km3 Y3 kdec3 KI2 D S1in S2in S3in time1 Ks1 Ks2 Ks3 Ks3c gamma0 gamma1 gamma2];
         
         %Check number of equations
         noeq=length(eqs);
@@ -832,22 +833,14 @@ case 'boa'
         init2(val1)=1; init2(val2)=1;
         
         fz=find(init2==0);
-        if noeq==3
-            s1i=str2num(get(handles.s1_init,'String')); x1i=str2num(get(handles.x1_init,'String'));
-            x2i=str2num(get(handles.x2_init,'String')); s2i=[]; s3i=[]; x3i=[]
-        elseif noeq==4
-            s1i=str2num(get(handles.s1_init,'String')); s2i=str2num(get(handles.s2_init,'String'));
-            x1i=str2num(get(handles.x1_init,'String')); x2i=str2num(get(handles.x2_init,'String')); s3i=[]; x3i=[];
-        elseif noeq==5
-            s1i=str2num(get(handles.s1_init,'String')); s2i=str2num(get(handles.s2_init,'String')); s3i=str2num(get(handles.s3_init,'String'));
-            x1i=str2num(get(handles.x1_init,'String')); x2i=str2num(get(handles.x2_init,'String')); x3i=[];
-        elseif noeq==6;
-            s1i=str2num(get(handles.s1_init,'String')); s2i=str2num(get(handles.s2_init,'String')); s3i=str2num(get(handles.s3_init,'String'));
-            x1i=str2num(get(handles.x1_init,'String')); x2i=str2num(get(handles.x2_init,'String')); x3i=str2num(get(handles.x3_init,'String'));
-        end
-        vrs={'s1i','x1i','s2i','x2i','s3i','x3i'};
+
+        s1i=str2num(get(handles.s1_init,'String')); s2i=str2num(get(handles.s2_init,'String')); s3i=str2num(get(handles.s3_init,'String'));
+        x1i=str2num(get(handles.x1_init,'String')); x2i=str2num(get(handles.x2_init,'String')); x3i=str2num(get(handles.x3_init,'String'));
+        s4i=str2num(get(handles.s4_init,'String')); s5i=str2num(get(handles.s5_init,'String')); s6i=str2num(get(handles.s6_init,'String')); 
+
+        vrs={'s1i','x1i','s2i','x2i','s3i','x3i','s4i','s5i','s6i'};
         
-        for kj=1:6
+        for kj=1:noeq
             if any(fz==kj)
                 init2(kj)=eval(char(vrs(kj)));
             end
@@ -860,47 +853,49 @@ case 'boa'
         grof=get(handles.step_p2,'Value');
         rng(0,'twister');
         if is3D==0
-            tt=time1*step_ic1*step_ic1; flag=3;
-            letr=param1(1);
-            Sarray=[1,3,5];
-            Xarray=[2,4,6];
-            if strcmp(letr,'S')
-                s1m=find(Sarray==val1);
-                s2m=find(Sarray==val2);
-                Sarray([s1m,s2m])=[];
-                val3=Sarray;
-            elseif strcmp(letr,'X')
-                x1m=find(Xarray==val1);
-                x2m=find(Xarray==val2);
-                Xarray([x1m,x2m])=[];
-                val3=Xarray;
-            end
+            tt=time1*step_ic1*step_ic1; flag=3; val3=[];
+            parameters(find(variables=='time1'))=tt; %Change total time to correct value for loops
+           % letr=param1(1);
             
-            p3=str1(val3,:);
-            strp3=['handles.',lower(p3),'_init'];
-            init_val3=str2num(get(eval(strp3),'String'));
-            p3=str1(val3,:);
-            strp3=['handles.',lower(p3),'_init'];
-            init_val3=str2num(get(eval(strp3),'String'));
-            
-            
+%             %%%%%CHANGE THIS TO BE GENERIC%%%%%
+%             Sarray=[1,3,5];
+%             Xarray=[2,4,6];
+%             if strcmp(letr,'S')
+%                 s1m=find(Sarray==val1);
+%                 s2m=find(Sarray==val2);
+%                 Sarray([s1m,s2m])=[];
+%                 val3=Sarray;
+%             elseif strcmp(letr,'X')
+%                 x1m=find(Xarray==val1);
+%                 x2m=find(Xarray==val2);
+%                 Xarray([x1m,x2m])=[];
+%                 val3=Xarray;
+%             end
+%             
+%             p3=str1(val3,:);
+%             strp3=['handles.',lower(p3),'_init'];
+%             init_val3=str2num(get(eval(strp3),'String'));
+%             p3=str1(val3,:);
+%             strp3=['handles.',lower(p3),'_init'];
+%             init_val3=str2num(get(eval(strp3),'String'));
+
             if grof==1
                 lsk1=linspace(min_ic1,max_ic1,step_ic1);
                 lsk2=linspace(min_ic2,max_ic2,step_ic1);
-                lsk3=linspace(init_val3,init_val3,step_ic1);
+                %lsk3=linspace(init_val3,init_val3,step_ic1);
                 xlns=repmat(lsk1,1,length(lsk1)); ynl=repmat(lsk2,length(lsk2),1);
                 ylns=reshape(ynl,1,numel(ynl));
-                znl=repmat(lsk3,length(lsk3),1);
-                zlns=reshape(znl,1,numel(znl));
+                %znl=repmat(lsk3,length(lsk3),1);
+                %zlns=reshape(znl,1,numel(znl));
                 
             elseif grof==2
                 lsk1a = (max_ic1-min_ic1).*rand(1,step_ic1) + min_ic1; lsk1=sort(lsk1a);
                 lsk2a = (max_ic2-min_ic2).*rand(1,step_ic1) + min_ic2; lsk2=sort(lsk2a);
-                lsk3=linspace(init_val3,init_val3,step_ic1);
+               % lsk3=linspace(init_val3,init_val3,step_ic1);
                 xlns=repmat(lsk1,1,length(lsk1)); ynl=repmat(lsk2,length(lsk2),1);
                 ylns=reshape(ynl,1,numel(ynl));
-                znl=repmat(lsk3,length(lsk3),1);
-                zlns=reshape(znl,1,numel(znl));
+                %znl=repmat(lsk3,length(lsk3),1);
+                %zlns=reshape(znl,1,numel(znl));
             end
             
         elseif is3D==1
@@ -922,8 +917,7 @@ case 'boa'
                 zl2b=reshape(zl2a,1,numel(zl2a)); zlns=meshgrid(zl,zl2b);
             end
         end
-        
-        
+
         set(handles.func_prog,'String','Running: Dynamics','ForegroundColor','r')
         if is3D==0
             for k=lsk1
@@ -935,15 +929,15 @@ case 'boa'
                     h=handles.timestamp;
                     h1=handles.progress;
                     cno=(cn-1)*time1;
-                    eval(['[tout,yout]=',solver,'(@model_gen, [0:stepsize:time1], init2, options, S1in, D, Y1, kdec1, Y2, kdec2, Y3, kdec3, km1, Ks1, km2, Ks2, km3, Ks3, Ks3c, KI2,gamma0, gamma1, gamma2, S2in, S3in,h,h1,tt,motif,flag,cno,thermeqs,gammas,dG);']);
-                    
+                    %eval(['[tout,yout]=',solver,'(@model_gen, [0:stepsize:time1], init2, options, S1in, D, Y1, kdec1, Y2, kdec2, Y3, kdec3, km1, Ks1, km2, Ks2, km3, Ks3, Ks3c, KI2,gamma0, gamma1, gamma2, S2in, S3in,h,h1,tt,motif,flag,cno,thermeqs,gammas,dG);']);
+                    eval(['[tout,yout]=',solver,'(@model_gen, [0:stepsize:time1], init2, options, parameters,h,h1,gfnc,growth,motif,flag,cno,thermeqs,gammas,dG,init_out,handles);']);
                     out_x(1:zt,cn)=yout(:,val1);
                     out_y(1:zt,cn)=yout(:,val2);
-                    out_z(1:zt,cn)=yout(:,val3);
+                   % out_z(1:zt,cn)=yout(:,val3);
                     
                     out_x_end(cn)=yout(end,val1);
                     out_y_end(cn)=yout(end,val2);
-                    out_z_end(cn)=yout(end,val3);
+                    %out_z_end(cn)=yout(end,val3);
                     
                     cn=cn+1;
                 end
@@ -1065,14 +1059,14 @@ case 'boa'
         set(handles.twodphase,'Enable','off'); set(handles.threedphase,'Enable','off')
         set(gca,'uicontextmenu',handles.Dimensions)
         
-        end
-        handles.plothandle=get(gca,'Children');
-        %Get axes labels
-        handles.xlabelhandle=get(gca,'Xlabel');
-        handles.ylabelhandle=get(gca,'Ylabel');
-        handles.zlabelhandle=get(gca,'Zlabel');
-        guidata(hObject,handles)
-        
-        
-        
-        
+end
+handles.plothandle=get(gca,'Children');
+%Get axes labels
+handles.xlabelhandle=get(gca,'Xlabel');
+handles.ylabelhandle=get(gca,'Ylabel');
+handles.zlabelhandle=get(gca,'Zlabel');
+guidata(hObject,handles)
+
+
+
+

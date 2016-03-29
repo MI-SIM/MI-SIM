@@ -47,7 +47,7 @@ if handles.gui_front==0
     opts.format = 'pdf';
     hgexport(f, fig_name, opts);
     close(f)
-    handles.gui_front==1;
+    handles.gui_front=1;
 end
 yout=handles.yout;
 tout=handles.tout;
@@ -456,8 +456,8 @@ switch which_plot
                     end
                     %plot the trajectory
                     plot(handles.trajectoryplot,X_value,Y_value,'linewidth',2)
-                    xlabel(handles.trajectoryplot,labels(indices_check(1)))
-                    ylabel(handles.trajectoryplot,labels(indices_check(2)))
+                    xlabel(handles.trajectoryplot,labels(indices_check(1),:))
+                    ylabel(handles.trajectoryplot,labels(indices_check(2),:))
                     %plot the start point (green dot)
                     plot(handles.trajectoryplot,yout_n(1,indices_check(1)),yout_n(1,indices_check(2)),'o','color','g','MarkerFaceColor','g')
                     %plot the end point (red dot)

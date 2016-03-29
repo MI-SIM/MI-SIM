@@ -342,7 +342,7 @@ switch growth
                 return
             case {'syn'}
                 if dse~=1
-                    gamma=str2num(get(handles.gamma0,'String'));
+                    gamma=str2num(get(handles.gamma0,'String')); exg=0;
                     while isempty(out)
                         [handles.thermeqs,eqtx5T,handles.gammas,handles.steqs,handles.dG,handles.dG_acc,handles.Temperature]=thermo_calc(handles.motif_name,gamma);
                         if handles.thermeqs{1}=='Null'
@@ -379,7 +379,7 @@ switch growth
                     adt=S3/(Ks3c+S3);
                     f3=(km3*S3/(Ks3+S3));
                 else
-                    gamma=str2num(get(handles.gamma1,'String'));
+                    gamma=str2num(get(handles.gamma1,'String')); exg=1;
                     while isempty(out)
                         [handles.thermeqs,eqtx5T,handles.gammas,handles.steqs,handles.dG,handles.dG_acc,handles.Temperature]=thermo_calc(handles.motif_name,gamma);
                         if handles.thermeqs{1}=='Null'
@@ -413,7 +413,7 @@ switch growth
             set(handles.text46,'Enable','off','String','n3')
             
             for nk=1:length(gamma)
-                eval(['set(handles.gamma',num2str(nk-1),',''Visible'',''on'',''enable'',''on'',''String'',handles.gammas(',num2str(nk),'))']);
+                eval(['set(handles.gamma',num2str(nk-1+exg),',''Visible'',''on'',''enable'',''on'',''String'',handles.gammas(',num2str(nk),'))']);
             end
             
             for k=1:length(handles.gammas)-length(gamma)
