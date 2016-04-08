@@ -41,6 +41,18 @@ switch motif
         I2=[]; I3=[]; I4=[];
         eqs=[eq1,eq2,eq3,eq4,eq5,eq6];
         
+        switch growth
+            
+            case 'Hoh'
+                eqs=[eq1,eq2,eq3];
+                for k=1:length(handles.thermeqs)
+                    eval(['eq',num2str(3+k),'=eval(handles.thermeqs(',num2str(k),'));'])
+                    eqs=[eqs,eval(['eq',num2str(3+k)])];
+                end
+                
+        end
+        
+        
     case 'fci'
         
         I3=1/(1+S3/KI2);

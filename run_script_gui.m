@@ -6,7 +6,7 @@
 % email address: matthew.wade@ncl.ac.uk; dr.matthewwade@ncl.ac.uk
 % alternative contact: Dr. Nick Parker, nick.parker@ncl.ac.uk
 % Website: https://github.com/MI-SIM/MI-SIM
-% September 2015; Last revision: 22-Mar-2016
+% September 2015; Last revision: 8-Apr-2016
 
 %% Preamble
 %Enable reporting
@@ -63,7 +63,8 @@ end
 %Define system equations
 [eqs, f1, f2, f3, I2, I3, I4]=define_system_equations(motif,growth,handles);
 gfnc=[f1,f2,f3,I2,I3,I4]; %Growth functions
-
+%digits(32) %Set precision
+format long
 %% Algorithms
 %Case structure for analysis routines
 switch handles.simtype
@@ -84,289 +85,72 @@ switch handles.simtype
         end
         
         %% Fixed points solutions
+        %Make assumptions (X,S real, non-negative)
+        syms S1 X1 S2 X2 S3 X3 S4 S5 S6 S7 real
+        assumeAlso(S1>=0); assumeAlso(X1>=0); assumeAlso(S2>=0); assumeAlso(X2>=0); assumeAlso(S3>=0); assumeAlso(X3>=0); assumeAlso(S4>=0); assumeAlso(S5>=0); assumeAlso(S6>=0); assumeAlso(S7>=0);
         
-        if noeq==3
-            syms S1 X1 X2 real
-            assumeAlso(S1>=0); assumeAlso(X1>=0); assumeAlso(X2>=0); %Make assumptions (X,S real non-negative)
-            %Use mupad to get all solutions
-            sol=feval(symengine,'solve',[eq1_numerical==0 eq2_numerical==0 eq3_numerical==0],[S1,X1,X2]);
-            init_out=['X2=init(4)'];
-            init2=[S1_init, X1_init, X2_init];
-            doub_sol=zeros(numel(sol),3);
-            for i=1:numel(sol)
-                % Loop over the number of solutions
-                a=sol(i);
-                for j=1:numel(a)
-                    % Loop over how many component
-                    b=children(a(j));
-                    doub_sol(i,j)=double(b(2));
-                end
-            end
-            clhead=[{'S1'},{'X1'},{'X2'}];
-            set(handles.s1_check,'Enable','on','value',1); set(handles.x1_check,'Enable','on','value',1);
-            set(handles.s2_check,'Enable','off','value',0); set(handles.x2_check,'Enable','on','value',1);
-            set(handles.s3_check,'Enable','off','value',0); set(handles.x3_check,'Enable','off','value',0);
-            set(handles.s4_check,'Value',0,'Enable','off'); set(handles.s5_check,'Value',0,'Enable','off');
-            set(handles.s6_check,'Value',0,'Enable','off');
-        elseif noeq==4
-            syms S1 X1 S2 X2 real
-            assumeAlso(S1>=0); assumeAlso(X1>=0); assumeAlso(S2>=0); assumeAlso(X2>=0); %Make assumptions (X,S real non-negative)
-            %Use mupad to get all solutions
-            sol=feval(symengine,'solve',[eq1_numerical==0 eq2_numerical==0 eq3_numerical==0 eq4_numerical==0],[S1,X1,S2,X2]);
-            init_out=['S2=init(3);X2=init(4)'];
-            init2=[S1_init, X1_init, S2_init, X2_init];
-            doub_sol=zeros(numel(sol),4);
-            for i=1:numel(sol)
-                % Loop over the number of solutions
-                a=sol(i);
-                for j=1:numel(a)
-                    % Loop over how many component
-                    b=children(a(j));
-                    doub_sol(i,j)=double(b(2));
-                end
-            end
-            
-            clhead=[{'S1'},{'X1'},{'S2'},{'X2'}];
-            set(handles.s1_check,'Enable','on','value',1); set(handles.x1_check,'Enable','on','value',1);
-            set(handles.s2_check,'Enable','on','value',1); set(handles.x2_check,'Enable','on','value',1);
-            set(handles.s3_check,'Enable','off','value',0); set(handles.x3_check,'Enable','off','value',0);
-            set(handles.s4_check,'Value',0,'Enable','off'); set(handles.s5_check,'Value',0,'Enable','off');
-            set(handles.s6_check,'Value',0,'Enable','off');
-        elseif noeq==5
-            switch growth
-                case {'Monod','Contois','Moser','Tessier','Haldane','Andrews'}
-                    
-                    syms S1 X1 S2 X2 S3 real
-                    assumeAlso(S1>=0); assumeAlso(X1>=0); assumeAlso(S2>=0); assumeAlso(X2>=0); assumeAlso(S3>=0); %Make assumptions (X,S real non-negative)
-                    %Use mupad to get all solutions
-                    sol=feval(symengine,'solve',[eq1_numerical==0 eq2_numerical==0 eq3_numerical==0 eq4_numerical==0 eq5_numerical==0],[S1,X1,S2,X2,S3]);
-                    init_out=['S2=init(3);X2=init(4);S3=init(5)'];
-                    
-                case {'Thermodynamic'}
-                    syms S1 X1 S2 X2 real
-                    assumeAlso(S1>=0); assumeAlso(X1>=0);assumeAlso(S2>=0); assumeAlso(X2>=0);
-                    noSy=noeq-4;
-                    eqnl='[eq1_numerical==0 eq2_numerical==0 eq3_numerical==0 eq4_numerical==0';
-                    eqvr='[S1,X1,S2,X2,';
-                    clvr='[{''S1''},{''X1''},{''S2''},{''X2''},';
-                    init_out=['S2=init(3);X2=init(4);'];
-                    k=3;
-                    eval(['syms S',num2str(k),' real'])
-                    eval(['assumeAlso(S',num2str(k),'>=0);'])
-                    eval(['eqnl=[eqnl,'' eq5_numerical==0''];']);
-                    eval(['eqvr=[eqvr,''S',num2str(k),',''];']);
-                    eval(['clvr=[clvr,''{''''S',num2str(k),'''''},''];'])
-                    init_out=[init_out,'S',num2str(k),'=init(5);'];
-                    
-                    eqnl=[eqnl,']'];
-                    eqvr(end)=']';
-                    clvr(end)=']';
-                    sol=feval(symengine,'solve',eval(eqnl),eqvr);
-                    clhead=eval(clvr);
-            end
-            init2=[S1_init, X1_init, S2_init, X2_init, S3_init];
-            doub_sol=zeros(numel(sol),5);
-            try
-                for i=1:numel(sol)
-                    
-                    % Loop over the number of solutions
-                    a=sol(i);
-                    for j=1:numel(a)
-                        % Loop over how many component
-                        b=children(a(j));
-                        doub_sol(i,j)=double(b(2));
-                    end
-                    
-                end
-            catch
-                a=vpa(sol);
-                b=children(children(a));
-                c=children(b{2});
-                for j=1:numel(c)
-                    doub_sol(j,:)=double(c{j});
-                end
-            end
-            
-            clhead=[{'S1'},{'X1'},{'S2'},{'X2'},{'S3'}];
-            set(handles.s1_check,'Enable','on','value',1); set(handles.x1_check,'Enable','on','value',1);
-            set(handles.s2_check,'Enable','on','value',1); set(handles.x2_check,'Enable','on','value',1);
-            set(handles.s3_check,'Enable','on','value',1); set(handles.x3_check,'Enable','off','value',0);
-            set(handles.s4_check,'Value',0,'Enable','off'); set(handles.s5_check,'Value',0,'Enable','off');
-            set(handles.s6_check,'Value',0,'Enable','off');
-        elseif noeq==6
-            
-            switch growth
-                case {'Monod','Contois','Moser','Tessier','Haldane','Andrews'}
-                    syms S1 X1 S2 X2 S3 X3 real
-                    assumeAlso(S1>=0); assumeAlso(X1>=0); assumeAlso(S2>=0); assumeAlso(X2>=0); assumeAlso(S3>=0); assumeAlso(X3>=0); %Make assumptions (X,S real non-negative)
-                    %Use mupad to get all solutions
-                    sol=feval(symengine,'solve',[eq1_numerical==0 eq2_numerical==0 eq3_numerical==0 eq4_numerical==0 eq5_numerical==0 eq6_numerical==0],[S1,X1,S2,X2,S3,X3]);
-                    clhead=[{'S1'},{'X1'},{'S2'},{'X2'},{'S3'},{'X3'}];
-                    init_out=['S2=init(3);X2=init(4);S3=init(5);X3=init(6)'];
-                    
-                case {'Thermodynamic'}
-                    syms S1 X1 S2 X2 real
-                    assumeAlso(S1>=0); assumeAlso(X1>=0); assumeAlso(S2>=0); assumeAlso(X2>=0);
-                    noSy=noeq-5;
-                    eqnl='[eq1_numerical==0 eq2_numerical==0 eq3_numerical==0 eq4_numerical==0';
-                    eqvr='[S1,X1,S2,X2,';
-                    clvr='[{''S1''},{''X1''},{''S2''},{''X2''},';
-                    init_out=['S2=init(3);X2=init(4);'];
-                    for k=3:3+noSy
-                        eval(['syms S',num2str(k),' real'])
-                        eval(['assumeAlso(S',num2str(k),'>=0);'])
-                        eval(['eqnl=[eqnl,'' eq',num2str(k+2),'_numerical==0''];']);
-                        eval(['eqvr=[eqvr,''S',num2str(k),',''];']);
-                        eval(['clvr=[clvr,''{''''S',num2str(k),'''''},''];'])
-                        init_out=[init_out,'S',num2str(k),'=init(',num2str(k+2),');'];
-                    end
-                    eqnl=[eqnl,']'];
-                    eqvr(end)=']';
-                    clvr(end)=']';
-                    sol=feval(symengine,'solve',eval(eqnl),eqvr);
-                    clhead=eval(clvr);
-            end
-            init2=[S1_init, X1_init, S2_init, X2_init, S3_init, X3_init];
-            try
-                temp=vpa(sol);
-                members=children(children(temp));
-                solutions = cellfun(@(c)c(:),members,'UniformOutput',false);
-                num_sol=children(solutions{2});
-                %Check for valid imaginary parts
-                s_imag=sum(any(imag(double(vpa(num_sol)))>1e-12));
-                if s_imag==0
-                    doub_sol=real(double(vpa(num_sol)));
-                else
-                    doub_sol=double(vpa(num_sol));
-                end
-                
-            catch
-                doub_sol=zeros(numel(sol),6);
-                for i=1:numel(sol)
-                    
-                    a=sol(i);
-                    for j=1:numel(a)
-                        b=children(a(j));
-                        doub_sol(i,j)=double(b(2));
-                    end
-                end
-            end
-            
-            set(handles.s1_check,'Enable','on','value',1); set(handles.x1_check,'Enable','on','value',1);
-            set(handles.s2_check,'Enable','on','value',1); set(handles.x2_check,'Enable','on','value',1);
-            set(handles.s3_check,'Enable','on','value',1); set(handles.x3_check,'Enable','on','value',1);
-            set(handles.s4_check,'Value',0,'Enable','off'); set(handles.s5_check,'Value',0,'Enable','off');
-            set(handles.s6_check,'Value',0,'Enable','off');
-            
-        elseif noeq>6
-            
-            switch motif
-                
-                case 'syn'
-                    syms S1 X1 S2 X2 real
-                    assumeAlso(S1>=0); assumeAlso(X1>=0); assumeAlso(S2>=0); assumeAlso(X2>=0);
-                    noSy=noeq-5;
-                    
-                    eqnl='[eq1_numerical==0 eq2_numerical==0 eq3_numerical==0 eq4_numerical==0';
-                    eqvr='[S1,X1,S2,X2,';
-                    clvr='[{''S1''},{''X1''},{''S2''},{''X2''},';
-                    init_out=['S2=init(3);X2=init(4);'];
-                    extra_init=['[S1_init,X1_init,S2_init,X2_init,'];
-                    
-                    for k=3:3+noSy
-                        eval(['syms S',num2str(k),' real'])
-                        eval(['assumeAlso(S',num2str(k),'>=0);'])
-                        eval(['eqnl=[eqnl,'' eq',num2str(k+2),'_numerical==0''];']);
-                        eval(['eqvr=[eqvr,''S',num2str(k),',''];']);
-                        eval(['clvr=[clvr,''{''''S',num2str(k),'''''},''];'])
-                        init_out=[init_out,'S',num2str(k),'=init(',num2str(k+2),');'];
-                        extra_init=[extra_init,'S',num2str(k),'_init,'];
-                    end
-                    eqnl=[eqnl,']'];
-                    eqvr(end)=']';
-                    clvr(end)=']';
-                    extra_init(end)=']';
-                    sol=feval(symengine,'solve',vpa(eval(eqnl)),eqvr);
-                    clhead=eval(clvr);
-                    
-                case 'ths'
-                    syms S1 X1 S2 X2 S3 X3 real
-                    assumeAlso(S1>=0); assumeAlso(X1>=0); assumeAlso(S2>=0); assumeAlso(X2>=0); assumeAlso(S3>=0); assumeAlso(X3>=0);
-                    noSy=noeq-7;
-                    
-                    eqnl='[eq1_numerical==0 eq2_numerical==0 eq3_numerical==0 eq4_numerical==0 eq5_numerical==0 eq6_numerical==0';
-                    eqvr='[S1,X1,S2,X2,S3,X3,';
-                    clvr='[{''S1''},{''X1''},{''S2''},{''X2''},{''S3''},{''X3''},';
-                    init_out=['S2=init(3);X2=init(4);S3=init(5);X3=init(6);'];
-                    extra_init=['[S1_init,X1_init,S2_init,X2_init,S3_init,X3_init,'];
-                    
-                    for k=4:4+noSy
-                        eval(['syms S',num2str(k),' real'])
-                        eval(['assumeAlso(S',num2str(k),'>=0);'])
-                        eval(['eqnl=[eqnl,'' eq',num2str(k+3),'_numerical==0''];']);
-                        eval(['eqvr=[eqvr,''S',num2str(k),',''];']);
-                        eval(['clvr=[clvr,''{''''S',num2str(k),'''''},''];'])
-                        init_out=[init_out,'S',num2str(k),'=init(',num2str(k+3),');'];
-                        extra_init=[extra_init,'S',num2str(k),'_init,'];
-                    end
-                    eqnl=[eqnl,']'];
-                    eqvr(end)=']';
-                    clvr(end)=']';
-                    extra_init(end)=']';
-                    sol=feval(symengine,'solve',eval(eqnl),eqvr);
-                    clhead=eval(clvr);
-                    
-            end
-            
-            init2=eval(extra_init);
-            try
-                temp=vpa(sol);
-                members=children(children(temp));
-                solutions = cellfun(@(c)c(:),members,'UniformOutput',false);
-                num_sol=children(solutions{2});
-                %Check for valid imaginary parts
-                s_imag=sum(any(imag(double(vpa(num_sol)))>1e-12));
-                if s_imag==0
-                    doub_sol=real(double(vpa(num_sol)));
-                else
-                    doub_sol=double(vpa(num_sol));
-                end
-            catch
-                doub_sol=zeros(numel(sol),6);
-                for i=1:numel(sol)
-                    % Loop over the number of solutions
-                    a=sol(i);
-                    for j=1:numel(a)
-                        % Loop over how many component
-                        b=children(a(j));
-                        doub_sol(i,j)=double(b(2));
-                    end
-                end
-            end
-            
-            set(handles.s1_check,'Enable','on','value',1,'String',clhead(1)); set(handles.x1_check,'Enable','on','value',1,'String',clhead(2));
-            set(handles.s2_check,'Enable','on','value',1,'String',clhead(3)); set(handles.x2_check,'Enable','on','value',1,'String',clhead(4));
-            set(handles.s3_check,'Enable','on','value',1,'String',clhead(5)); set(handles.x3_check,'Enable','on','value',1,'String',clhead(6));
-            if noeq==7;
-                set(handles.s4_check,'Value',1,'Enable','on','String',clhead(7)); set(handles.s5_check,'Value',0,'Enable','off','String','S5');
-                set(handles.s6_check,'Value',0,'Enable','off','String','S6');
-            elseif noeq==8
-                set(handles.s4_check,'Value',1,'Enable','on','String',clhead(7)); set(handles.s5_check,'Value',1,'Enable','on','String',clhead(8));
-                set(handles.s6_check,'Value',0,'Enable','off','String','S6');
+        %Use mupad to get all solutions
+        eqnl=['['];
+        clvr=cellstr(handles.var_names);
+        eqvr=sym(clvr); 
+        extra_init=['['];
+        
+        init_out=[];                               %Initial conditions initialisation
+
+        for k=1:noeq
+            eval(['eqnl=[eqnl,'' eq',num2str(k),'_numerical==0''];']);
+            extra_init=[extra_init,[char(clvr(k)),'_init,']];
+        end
+        for k=3:noeq
+            init_out=[init_out,[char(clvr(k)),'=init(',num2str(k),');']];            
+        end
+        eqnl=[eqnl,']'];
+        extra_init(end)=']';
+        dgts=str2num(get(handles.prec_num,'String'));
+        digits(dgts)
+        sol=feval(symengine,'solve',simplify(eval(eqnl)),eqvr);
+        digits 32
+        clhead=clvr;
+        
+        init2=eval(extra_init);
+        try
+            temp=vpa(sol);
+            members=children(children(temp));
+            solutions = cellfun(@(c)c(:),members,'UniformOutput',false);
+            num_sol=children(solutions{2});
+            %Check for valid imaginary parts
+            s_imag=sum(any(imag(double(vpa(num_sol)))>1e-12));
+            if s_imag==0
+                doub_sol=real(double(vpa(num_sol)));
             else
-                set(handles.s4_check,'Value',1,'Enable','on','String',clhead(7)); set(handles.s5_check,'Value',1,'Enable','on','String',clhead(8));
-                set(handles.s6_check,'Value',1,'Enable','on','String',clhead(9));
+                doub_sol=double(vpa(num_sol));
             end
-            
+        catch
+            doub_sol=zeros(numel(sol),6);
+            for i=1:numel(sol)
+                % Loop over the number of solutions
+                a=sol(i);
+                for j=1:numel(a)
+                    % Loop over how many component
+                    b=children(a(j));
+                    doub_sol(i,j)=double(b(2));
+                end
+            end
         end
         
+        %Set ticks
+        set(handles.s1_check,'Enable','off','Value',0); set(handles.x1_check,'Enable','off','Value',0); set(handles.s2_check,'Enable','off','Value',0);
+        set(handles.x2_check,'Enable','off','Value',0); set(handles.s3_check,'Enable','off','Value',0); set(handles.x3_check,'Enable','off','Value',0);
+        set(handles.s4_check,'Enable','off','Value',0); set(handles.s5_check,'Enable','off','Value',0); set(handles.s6_check,'Enable','off','Value',0);
+        for kn=1:length(clhead)
+            eval(['set(handles.',char(lower(clvr{kn})),'_check,''Enable'',''on'',''Value'',1,''String'',','''',clhead{kn},'''',')'])
+        end
+
         %Remove invalid fixed points (fp<0)
         [ii,jj]=find(doub_sol<0);
         iu = unique(ii);
         doub_sol(iu,:)=[];
         
-        format shorteng
-        format compact
         [xx,yy]=size(doub_sol);
         if yy==1
             fixed_numerical1=doub_sol';
@@ -380,12 +164,11 @@ switch handles.simtype
             rnm=[rnm,{['FP',num2str(k)]}];
         end
         set(handles.infotable,'Visible','on','Data',fixed_numerical1,'RowName',rnm,'ColumnName',clhead)
-        
-        
+                
         %% Stability
         %Shows the stability of the fixed points in the GUI
-        stability_analysis
-        set(handles.stabtable,'Visible','on','Data',[s',s2'],'RowName',rnm)
+       %stability_analysis
+       %set(handles.stabtable,'Visible','on','Data',[s',s2'],'RowName',rnm)
         
         %Options for ODE solver
         if jacobanaly==1
@@ -403,7 +186,7 @@ switch handles.simtype
         h1=handles.progress;
         tt=time1; flag=[]; cno=[];
         te = cputime;
-        eval(['[tout,yout]=',solver,'(@model_gen, [0:stepsize:time1], init2, options, parameters,h,h1,gfnc,growth,motif,flag,cno,thermeqs,gammas,dG,init_out,handles);']);
+        eval(['[tout,yout]=',solver,'(@model_gen, [0:stepsize:time1], init2, options, parameters,h,h1,gfnc,growth,motif,flag,cno,handles.thermeqs,handles.gammas,handles.dG,init_out,handles);']);
         tfe= cputime-te;
         
         set(handles.func_prog,'String','Completed: Dynamics','ForegroundColor',[0 0.6 1])

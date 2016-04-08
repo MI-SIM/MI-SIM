@@ -22,7 +22,7 @@ function varargout = MI_SIM(varargin)
 
 % Edit the above text to modify the response to help MI_SIM
 
-% Last Modified by GUIDE v2.5 11-Mar-2016 15:04:19
+% Last Modified by GUIDE v2.5 08-Apr-2016 13:41:50
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -69,6 +69,7 @@ set(handles.solver,'Value',3);
 set(handles.abstol,'String','1e-8');
 set(handles.reltol,'String','1e-8');
 set(handles.step_size,'String','0.01');
+set(handles.prec_num,'String','32');
 set(handles.error_val,'String','1e-6');
 set(handles.pert_p,'String','0.0001');
 set(handles.func_prog,'String','');
@@ -114,7 +115,7 @@ handles.clcyc=1;
 
 %List of Existing Growth Models
 Exist_Models=[{'Commensalism'};{'Competition'};{'Predation'};{'No_interaction'};{'Cooperation'};{'Amensalism'};{'Threespecies'}];
-Exist_Gmodels=[{'Monod'};{'Contois'};{'Tessier'};{'Moser'};{'Haldane'};{'Andrews'};{'Thermodynamic'}];
+Exist_Gmodels=[{'Monod'};{'Contois'};{'Tessier'};{'Moser'};{'Haldane'};{'Andrews'};{'Thermodynamic'};{'Hoh'}];
 if ~isempty(varargin)
     %Check valid model
     if numel(varargin)==2
@@ -569,6 +570,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+
 % --- Executes on selection change in solver.
 function solver_Callback(hObject, eventdata, handles)
 solvstr=get(hObject,'String');
@@ -638,11 +640,21 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+function prec_num_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function prec_num_CreateFcn(hObject, eventdata, handles)
+precision=str2double(get(hObject,'string'));
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
 % --- Executes on button press in plot_button2.
 function plot_button2_Callback(hObject, eventdata, handles)
 which_plot='traj';
 plot_results;
-
 
 % --- Executes on button press in s1_check.
 function s1_check_Callback(hObject, eventdata, handles)
@@ -1316,11 +1328,13 @@ set(handles.gamma3,'String','','Visible','off')
 set(handles.gamma4,'String','','Visible','off')
 set(handles.gamma5,'String','','Visible','off')
 set(handles.gamma6,'String','','Visible','off')
+
 set(handles.ks32_in,'String',1e-6);
 set(handles.abstol,'String',1e-8);
 set(handles.reltol,'String',1e-8);
 set(handles.error_val,'String','1e-6');
 set(handles.step_size,'String','0.01');
+set(handles.prec_num,'String','32');
 set(handles.solver,'value',3);
 set(handles.pert_p,'value',0.00001);
 set(handles.normeig,'Visible','off','Value',0)
@@ -1704,3 +1718,6 @@ function furth_plots_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+

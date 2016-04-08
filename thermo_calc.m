@@ -22,7 +22,7 @@ function varargout = thermo_calc(varargin)
 
 % Edit the above text to modify the response to help thermo_calc
 
-% Last Modified by GUIDE v2.5 07-Mar-2016 15:35:03
+% Last Modified by GUIDE v2.5 04-Apr-2016 14:56:11
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -49,13 +49,33 @@ function thermo_calc_OpeningFcn(hObject, eventdata, handles, varargin)
 
 motif=varargin{1};
 gammas=varargin{2};
+try
+    growth=varargin{3};
+    Xnum=varargin{4}; handles.xnum=Xnum;
+    handles.growth=growth;
+    handles.rte=Xnum-1;
+end
 
-handles.gammas1=gammas;
+try
+    handles.old_cmps=varargin{5};
+    handles.old_eqs=varargin{6};
+    handles.old_eqtx=varargin{7};
+    handles.gamma_count=varargin{8};
+end
 
-%Set gamma values
-for k=1:length(gammas)
-    g=num2str(gammas(k));
-    eval(['set(handles.p',num2str(k),'_gamma,''String'',g,''Enable'',''on'')']);
+if ~iscell(gammas)
+    handles.gammas1=gammas;
+    
+    %Set gamma values
+    for k=1:length(gammas)
+        g=num2str(gammas(k));
+        eval(['set(handles.p',num2str(k),'_gamma,''String'',g,''Enable'',''on'')']);
+    end
+    
+else
+    for k=1:length(gammas)
+        eval(['set(handles.p',num2str(k),'_gamma,''Enable'',''on'')']);
+    end
 end
     
 axes(handles.delta_G_ax)
@@ -67,6 +87,25 @@ text(0.18,0.7,'$\Delta G^0$ (kJ/mol)','interpreter','latex','horiz','left','vert
 axes(handles.axes6)
 text(0.5,0.74,'$\gamma_p$','interpreter','latex','horiz','left','vert','middle','fontsize',14)
 switch motif
+    
+    case 'Competition'
+        
+        str_react=['$$S1\mathop{\longrightarrow}^{X',num2str(Xnum),'}S2$$'];
+        set(handles.r1_text,'String','S1')
+        set(handles.p1_text,'String','S2')
+        handles.eqno=3; handles.gammas1=[];
+        syms X1 Y1 f1 X2 Y2 f2
+        Xx=[X1,X2]; Ff=[f1,f2]; Yy=[Y1,Y2];
+        handles.funcN=(1-Yy(Xnum))*Ff(Xnum)*Xx(Xnum); 
+        handles.funcTa='+\gamma_';
+        handles.funcTb=['(1-Y_',num2str(Xnum),')f_',num2str(Xnum),'X_',num2str(Xnum)];
+        set(handles.react_sel,'Enable','off','Value',2)
+
+        set(handles.rr_text,'Visible','on'); set(handles.rr,'Visible','on');
+        set(handles.comp_title,'Visible','on')
+        handles.react_sy={'S1'};
+        handles.kr=1;
+    
     case 'Cooperation'
         str_react='$$S1\mathop{\longrightarrow}^{X1}S2$$';
         set(handles.r1_text,'String','S1')
@@ -76,6 +115,7 @@ switch motif
         handles.funcN=(1-Y1)*f1*X1*I2; 
         handles.funcTa='+\gamma_';
         handles.funcTb='(1-Y_1)f_1X_1I_2';
+        handles.kr=[];
         
     case 'Threespecies'
         str_react='$$S2\mathop{\longrightarrow}^{X2}S3$$';
@@ -86,9 +126,11 @@ switch motif
         syms X2 Y2 I2 f2 
         handles.funcN=(1-Y2)*f2*X2*I2; 
         handles.funcTa='+\gamma_';
-        handles.funcTb='(1-Y_2)f_1X_2I_2';
+        handles.funcTb='(1-Y_2)f_2X_2I_2';
+        handles.kr=[];
 end
 handles.motif=motif;
+handles.cmp_names=[];
 axes(handles.eq_disp)
 text(0.25,0.5,str_react,'interpreter','latex','horiz','left','vert','middle','fontsize',18)
 handles.output = hObject;
@@ -124,11 +166,13 @@ set(handles.r2_cs,'Enable','off','String','Compounds')
 set(handles.r2_ss,'Enable','off','String','Systems')
 set(handles.r2_gas,'Value',0);
 set(handles.r2_dg,'Visible','off','String','.');
+set(handles.r2_text,'Enable','off');
 
 set(handles.r3_cs,'Enable','off','String','Compounds')
 set(handles.r3_ss,'Enable','off','String','Systems')
 set(handles.r3_gas,'Value',0);
 set(handles.r3_dg,'Visible','off','String','.');
+set(handles.r3_text,'Enable','off');
 
 set(handles.p1_cs,'Enable','off','String','Compounds')
 set(handles.p1_ss,'Enable','off','String','Systems')
@@ -179,6 +223,9 @@ try
     varargout{5}= handles.dG;
     varargout{6}= handles.dG_acc;
     varargout{7}= handles.Temperature;
+    varargout{8}= handles.kr;
+    varargout{9}= handles.cmp_names;
+    varargout{10}= handles.gamma_count;
 catch
     varargout{1}={'Null'};
     varargout{2}=[];
@@ -187,6 +234,9 @@ catch
     varargout{5}=[];
     varargout{6}=[];
     varargout{7}=[];
+    varargout{8}=[];
+    varargout{9}=[];
+    varargout{10}=[];
 end
 delete(gcf)
 
@@ -261,13 +311,23 @@ if sel_num==1
 end
 
 sel_numa=sel_num;
+dd=2;
 
 switch handles.motif
-    case 'Cooperation'
+
+    case {'Competition'}
+        rsym={'S1'};
+        psym={''};
+        num_start=3;
+        rsel_num=rsel_num-2; k=1; dd=1;
+        set(handles.cmp1,'Enable','on','Visible','on')
+        
+    case {'Cooperation'}
         rsym={'S1'};
         psym={'S2'};
         num_start=3;
         rsel_num=rsel_num-2; k=2;
+        set(handles.cmp1,'Enable','on','Visible','on')
     case 'Threespecies'
         rsym={'S2'};
         psym={'S3'};
@@ -289,6 +349,7 @@ for kk=2:sel_numa
     eval(['set(handles.p',num2str(kk),'_mass,''Enable'',''on'')'])
     eval(['set(handles.p',num2str(kk),'_gas,''Enable'',''on'')'])
     eval(['set(handles.p',num2str(kk),'_gamma,''Enable'',''on'')'])
+    eval(['set(handles.cmp',num2str(kk),',''Enable'',''on'',''Visible'',''on'')'])
 end
 
 if sel_numa<5
@@ -298,21 +359,22 @@ if sel_numa<5
         eval(['set(handles.p',num2str(kk),'_mass,''Enable'',''off'')'])
         eval(['set(handles.p',num2str(kk),'_gas,''Enable'',''off'')'])
         eval(['set(handles.p',num2str(kk),'_gamma,''Enable'',''off'')'])
+        eval(['set(handles.cmp',num2str(kk),',''Enable'',''off'',''Visible'',''off'')'])
     end
 end
 
 rnsym={};
 if rsel_num>0
-    for k=num_start:num_start+rsel_num-1
-        rsym=[rsym,{['+S',num2str(k)]}];
-        rnsym=[rnsym,{['S',num2str(k)]}];
+    for kj=num_start:num_start+rsel_num-1
+        rsym=[rsym,{['+S',num2str(kj)]}];
+        rnsym=[rnsym,{['S',num2str(kj)]}];
     end
 end
 
 pnsym={};
 
 z_s=k+1;
-for kk=z_s:z_s+sel_num-2
+for kk=z_s:z_s+sel_num-dd
     psym=[psym,{['+S',num2str(kk)]}];
     pnsym=[pnsym,{['S',num2str(kk)]}];
 end
@@ -320,7 +382,14 @@ end
 handles.react_sy=rnsym;
 handles.prod_sy=pnsym;
     switch handles.motif
-        case 'Cooperation'
+        
+        case {'Competition'}
+            
+            str_react=['$$',cell2mat(rsym),'\mathop{\longrightarrow}^{X',num2str(handles.xnum),'} ',cell2mat(psym),'$$'];
+            axes(handles.eq_disp)
+            text(0.25,0.5,str_react,'interpreter','latex','horiz','left','vert','middle','fontsize',18)
+          
+        case {'Cooperation'}
             
             str_react=['$$',cell2mat(rsym),'\mathop{\longrightarrow}^{X1} ',cell2mat(psym),'$$'];
             axes(handles.eq_disp)
@@ -425,6 +494,7 @@ b=get(handles.p1_text,'String');
 c=sscanf(b,'%s%f');
 Sd=str2num(char(c(2)));
 Sdn=Sd+1;
+Nn=1;
 
 %For Reactants
 mr1=str2num(get(handles.r1_in,'String'));
@@ -457,18 +527,30 @@ end
 dg1=dg0+sum(rg_store);
 
 %For Products
-m1=str2num(get(handles.p1_in,'String'));
-M1=str2num(get(handles.p1_mass,'String'));
-eqS=M1^m1;Symbs={get(handles.p1_text,'String')}; m_store=m1;
-try
-    dgP1=m1*str2num(get(handles.p1_dg,'String')); %Positive on reactant side
-catch
-    dgP1=1;
+
+switch handles.growth
+    case 'Hoh'
+        Sdn=Sd;
+
+        Nn=0;jh=1; pg_store=[]; m_store=[]; eqS=[]; Symbs={''};
+        
+    case 'Thermodynamic'
+        
+        m1=str2num(get(handles.p1_in,'String'));
+        M1=str2num(get(handles.p1_mass,'String'));
+        eqS=M1^m1;Symbs={get(handles.p1_text,'String')}; m_store=m1;
+        try
+            dgP1=m1*str2num(get(handles.p1_dg,'String')); %Positive on reactant side
+        catch
+            dgP1=1;
+        end
+        jh=2; pg_store=dgP1;
 end
+
 Prs=get(handles.product_select,'Value');
-jh=2; pg_store=dgP1;
-if Prs>1
-    for kg=2:Prs
+
+if Prs>Nn
+    for kg=Nn+1:Prs
         eval(['dgP',num2str(kg),'=str2num(get(handles.p',num2str(jh),'_dg,''String''));'])
         eval(['m',num2str(kg),'=str2num(get(handles.p',num2str(jh),'_in,''String''));']);
         eval(['M',num2str(kg),'=str2num(get(handles.p',num2str(jh),'_mass,''String''));']);
@@ -511,14 +593,22 @@ RTln=R*T*log(10);
 dGp = dg2+RTln*log10(SubE)+RTln*(MmE);
 dG = dGp/(R*T);
 
+
 %Set add substrate equation button to enabled
 set(handles.add_sn,'Enable','on')
 cla(handles.axes8)
 axes(handles.axes8)
 digits 4
 text(0,0.72,['$\Delta G$ (kJ/mol) = $',char(vpa(dGp)),'$'],'interpreter','latex','horiz','left','vert','middle','fontsize',12)
-handles.dG=char(vpa(dGp));
+digits 32
+handles.dG=char(vpa(dGp,16));
 handles.dG_acc=char(dGp);
+switch handles.growth
+    case 'Hoh'
+        handles.dG=char(vpa(dG,16));
+        handles.dG_acc=char(dG);
+end
+
 guidata(hObject,handles)
 
 function dG0_in_Callback(hObject, eventdata, handles)
@@ -872,6 +962,15 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+function rr_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function rr_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
 % --- Executes on selection change in p1_cs.
 function p1_cs_Callback(hObject, eventdata, handles)
 p1v=get(handles.p1_cs,'Value');
@@ -879,6 +978,7 @@ temp=str2num(get(handles.temp_in,'String'));
 compound = handles.Gdata4.data(p1v,:);
 cmpd=get(handles.p1_cs,'String');
 cmpdn=cmpd(get(handles.p1_cs,'Value'));
+set(handles.cmp1,'String',cmpdn)
 axes(handles.dG_ax)
 hold off
 plot(handles.temperatures,compound,'linewidth',2)
@@ -908,6 +1008,7 @@ temp=str2num(get(handles.temp_in,'String'));
 compound = handles.Gdata5.data(p2v,:);
 cmpd=get(handles.p2_cs,'String');
 cmpdn=cmpd(get(handles.p2_cs,'Value'));
+set(handles.cmp2,'String',cmpdn)
 axes(handles.dG_ax)
 hold off
 plot(handles.temperatures,compound,'linewidth',2)
@@ -937,6 +1038,7 @@ temp=str2num(get(handles.temp_in,'String'));
 compound = handles.Gdata6.data(p3v,:);
 cmpd=get(handles.p3_cs,'String');
 cmpdn=cmpd(get(handles.p3_cs,'Value'));
+set(handles.cmp3,'String',cmpdn)
 axes(handles.dG_ax)
 hold off
 plot(handles.temperatures,compound,'linewidth',2)
@@ -966,6 +1068,7 @@ temp=str2num(get(handles.temp_in,'String'));
 compound = handles.Gdata7.data(p4v,:);
 cmpd=get(handles.p4_cs,'String');
 cmpdn=cmpd(get(handles.p4_cs,'Value'));
+set(handles.cmp4,'String',cmpdn)
 axes(handles.dG_ax)
 hold off
 plot(handles.temperatures,compound,'linewidth',2)
@@ -995,6 +1098,7 @@ temp=str2num(get(handles.temp_in,'String'));
 compound = handles.Gdata8.data(p5v,:);
 cmpd=get(handles.p5_cs,'String');
 cmpdn=cmpd(get(handles.p5_cs,'Value'));
+set(handles.cmp5,'String',cmpdn)
 axes(handles.dG_ax)
 hold off
 plot(handles.temperatures,compound,'linewidth',2)
@@ -1568,16 +1672,133 @@ function add_sn_Callback(hObject, eventdata, handles)
 handles.symR;
 
 %Define equations for additional substrates (Products)
-noP=length(handles.symP); gamma1=[];
 syms D
-P=[]; Pt=[];
-for k=1:noP-1
-    gamma1{k}=get(eval(['handles.p',num2str(k+length(handles.gammas1)),'_gamma']),'String');
-    eq{k}=-D*handles.symP(k+1)+gamma1{k}*handles.funcN;
-    eqtx{k}=['$\frac{dS_',num2str(handles.nP+(k-1)),'}{dt} = -DS_',num2str(handles.nP+(k-1)),handles.funcTa,num2str(k+2+(length(handles.gammas1)-1)),handles.funcTb,'$'];
-    eval(['eq',num2str(handles.eqno+1),'=eq{k};'])
-    P=[P,eq(k)];
-    Pt=[Pt;eqtx{k}];
+noP=length(handles.symP); gamma1=[];
+
+switch handles.growth
+    
+    case 'Thermodynamic'
+
+        P=[]; Pt=[];
+        if noP>1
+            for k=1:noP-1
+                gamma1{k}=get(eval(['handles.p',num2str(k+length(handles.gammas1)),'_gamma']),'String');
+                eq{k}=-D*handles.symP(k+1)+gamma1{k}*handles.funcN;
+                eqtx{k}=['$\frac{dS_',num2str(handles.nP+(k-1)),'}{dt} = -DS_',num2str(handles.nP+(k-1)),handles.funcTa,num2str(k+2+(length(handles.gammas1)-1)),handles.funcTb,'$'];
+                eval(['eq',num2str(handles.eqno+1),'=eq{k};'])
+                P=[P,eq(k)];
+                Pt=[Pt;eqtx{k}];
+            end
+        else
+            gamma1=get(handles.p1_gamma,'String');
+            eq=-D*handles.symP+gamma1*handles.funcN;
+            eqtx=['$\frac{dS_',num2str(handles.nP),'}{dt} = -DS_',num2str(handles.nP),handles.funcTa,num2str(handles.rte+1),handles.funcTb,'$'];
+            eval(['eq',num2str(handles.eqno+1),'=eq;'])
+            P=[P,eq];
+            Pt=[Pt;eqtx];
+        end
+        
+    case 'Hoh'
+        if handles.xnum>1
+            
+            cmp_names2=[];
+            for k=1:length(handles.prod_sy)
+                compN=eval(['get(handles.cmp',num2str(k),',''String'');']);
+                if isempty(compN)
+                    compN=['NewN',num2str(k)];
+                end
+                cmp_names2=strvcat(cmp_names2,compN);
+            end
+            [inter_names,inter_indx]=intersect(cmp_names2,handles.old_cmps); %Find location of matching products in both reactions (in new)
+            [inter_names_o,inter_indx_o]=intersect(handles.old_cmps,cmp_names2); %Find location of matching products in both reactions (in old)
+            
+            [inter_names2,inter_indx2]=setdiff(cmp_names2,handles.old_cmps); %Find location of unique products in both reactions (in new)
+            [inter_names2_o,inter_indx2_o]=setdiff(handles.old_cmps,cmp_names2); %Find location of unique products in both reactions (in old)
+            eq=handles.old_eqs{1}; eqtx=handles.old_eqtx;
+            
+            P=[]; Pt=[]; Prod=[]; eq1={}; eq2={}; eqtx1=[];
+            %Assign matching compounds to same equation
+            if ~isempty(inter_indx)
+                for kk=1:length(inter_indx)
+                    jk=inter_indx(kk);
+                    jko=inter_indx_o(kk);
+                    gamma1{jko}=get(eval(['handles.p',num2str(jk),'_gamma']),'String');
+                    eq1{jko}=eq{jko}+gamma1{jko}*handles.funcN;
+                    eqtx1{jko}=[eqtx(jko,1:end-1),handles.funcTa,num2str(handles.gamma_count(end)+jk),handles.funcTb,'$'];
+                    eval(['eq',num2str(handles.eqno+kk),'=eq;'])
+                    P=[P,eq1{jko}];
+                    Pt=strvcat(Pt,eqtx1{jko});
+                    Prod=[Prod,{eval(['get(handles.p',num2str(jko),'_text,''String'')'])}];
+                end
+            end
+            
+            eq1a=eq(inter_indx2_o); %Add old unique equations
+            P=[P,eq1a];
+
+         %Assign unique compounds to new equation
+         if ~isempty(inter_indx2)
+         un_indx=1+length(handles.old_cmps)+length(cmp_names2)-length(inter_indx);
+         gam_indx=handles.gamma_count(end)+kk;
+           for kj=1:length(inter_indx2)
+                jj=inter_indx2(kj);
+                jjo=inter_indx2_o(kj);
+                gamma1{jjo}=get(eval(['handles.p',num2str(jj),'_gamma']),'String');
+                eq2{jjo}=-D*sym(['S',num2str(un_indx)])+gamma1{jjo}*handles.funcN;
+                eqtx=['$\frac{dS_',num2str(un_indx),'}{dt} = -DS_',num2str(un_indx),handles.funcTa,num2str(handles.gamma_count(end)+jj),handles.funcTb,'$'];
+                eval(['eq',num2str(handles.eqno+kj),'=eq;'])
+                P=[P,eq2];
+                Pt=strvcat(Pt,eqtx);
+                Prod=[Prod,{['S',num2str(un_indx)]}];
+
+           end
+           
+           %Add previous equations
+           Ptn=strvcat(handles.old_eqtx(inter_indx2_o,:),Pt);
+           
+           %Remove empty cells
+           try
+               P = P(~cellfun('isempty',P));
+           end
+           %Set reaction equation equal to correct substrates and change
+           %variable names and dG
+           var_diff1=setdiff(handles.prod_sy,Prod);
+           var_diff2=setdiff(Prod,handles.prod_sy);
+           
+           handles.prod_sy=Prod;
+           handles.dG=subs(handles.dG,var_diff1,var_diff2);
+           handles.dG_acc=subs(handles.dG_acc,var_diff1,var_diff2);
+           cla(handles.axes8)
+           axes(handles.axes8)
+           digits 4
+           text(0,0.72,['$\Delta G$ (kJ/mol) = $',char(vpa(handles.dG_acc)),'$'],'interpreter','latex','horiz','left','vert','middle','fontsize',12)
+           digits 32
+         else
+             Ptn=Pt;
+         end
+            
+        else
+            
+            P=[]; Pt=[]; handles.gamma_count=[];
+            if noP>1
+                for k=1:noP
+                    gamma1{k}=get(eval(['handles.p',num2str(k+length(handles.gammas1)),'_gamma']),'String');
+                    eq{k}=-D*handles.symP(k)+gamma1{k}*handles.funcN;
+                    eqtx{k}=['$\frac{dS_',num2str(handles.nP+(k-2)),'}{dt} = -DS_',num2str(handles.nP+(k-2)),handles.funcTa,num2str(k+1+(length(handles.gammas1)-1)),handles.funcTb,'$'];
+                    handles.gamma_count=[handles.gamma_count,k+1+(length(handles.gammas1)-1)];
+                    eval(['eq',num2str(handles.eqno+1),'=eq{k};'])
+                    P=[P,eq(k)];
+                    Pt=[Pt;eqtx{k}];
+                end
+            else
+                gamma1=get(handles.p1_gamma,'String');
+                eq=-D*handles.symP+gamma1*handles.funcN;
+                eqtx=['$\frac{dS_',num2str(handles.nP),'}{dt} = -DS_',num2str(handles.nP),handles.funcTa,num2str(handles.rte+1),handles.funcTb,'$'];
+                eval(['eq',num2str(handles.eqno+1),'=eq;'])
+                P=[P,eq];
+                Pt=[Pt;eqtx];
+            end
+            Ptn=Pt;
+        end
 end
 
 for k=1:noP
@@ -1588,10 +1809,9 @@ axes(handles.axes7)
 text(0.3,0.4,Pt,'interpreter','latex','FontSize',14)
 set(handles.finish_but,'Enable','on')
 handles.thermo_eqs=P;
-handles.thermo_text=Pt;
+handles.thermo_text=Ptn;
 handles.gamma_out=gamma;
 guidata(hObject,handles)
-
 
 % --- Executes on button press in finish_but.
 function finish_but_Callback(hObject, eventdata, handles)
@@ -1599,5 +1819,70 @@ handles.output1=handles.thermo_eqs;
 handles.output2=handles.thermo_text;
 handles.output3=handles.gamma_out;
 handles.output4=[handles.react_sy,handles.prod_sy];
+handles.kr=str2num(get(handles.rr,'String'));
+if ~isnumeric(handles.kr) || handles.kr>1
+    handles.kr=1;
+end
+
+if handles.xnum==1
+    handles.cmp_names=[];
+    for k=1:length(handles.prod_sy)
+        
+        comp=eval(['get(handles.cmp',num2str(k),',''String'');']);
+        if isempty(comp)
+            comp=['New',num2str(k)];
+        end
+        handles.cmp_names=strvcat(handles.cmp_names,comp);
+        
+    end
+end
+   
 guidata(hObject,handles)
 uiresume(handles.figure1);
+
+
+function cmp1_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function cmp1_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+function cmp2_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function cmp2_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+function cmp3_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function cmp3_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+function cmp4_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function cmp4_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+function cmp5_Callback(hObject, eventdata, handles)
+
+
+% --- Executes during object creation, after setting all properties.
+function cmp5_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

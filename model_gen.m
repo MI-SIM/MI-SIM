@@ -6,7 +6,10 @@ function [dP]=model_gen(time, init, parameters,h,h1,gfnc,growth,motif,flag,cno,t
 % email address: matthew.wade@ncl.ac.uk; dr.matthewwade@ncl.ac.uk
 % alternative contact: Dr. Nick Parker, nick.parker@ncl.ac.uk
 % Website: https://github.com/MI-SIM/MI-SIM
-% September 2015; Last revision: 11-Mar-2016
+% September 2015; Last revision: 1-Apr-2016
+
+%Set precision
+digits(32)
 
 %Deal parameters
 km1=parameters(1);
@@ -36,7 +39,7 @@ switch growth
         n1=parameters(23);
         n2=parameters(24);
         n3=parameters(25);
-    case {'Thermodynamic'}
+    case {'Thermodynamic','Hoh'}
         for k=1:length(gammas)
            eval(['gamma',num2str(2+k),'=gammas(',num2str(k),');']) 
         end
@@ -83,7 +86,22 @@ switch motif
         eq2=-D*X1+Y1*f1*X1-kdec1*X1; 
         eq3=-D*X2+Y2*f2*X2-kdec2*X2;
         eq4=[]; eq5=[]; eq6=[];
+                
         dP=[eq1;eq2;eq3;eq4;eq5;eq6];
+        switch growth
+            case 'Hoh'
+                dP=[eq1;eq2;eq3];
+                for k=1:length(thermeqs)
+                    eval(['eq',num2str(3+k),'=thermeqs{',num2str(k),'};'])
+                    try
+                        dP=[dP;eval(['eq',num2str(3+k)])];
+                    catch
+                        dP=[dP;['eq',num2str(3+k)]];
+                    end
+                end
+                dP=eval(dP);
+        end
+
     case 'fci'
         f1=gnum(1); f2=gnum(2);
         I3=gnum(3);
@@ -168,7 +186,7 @@ switch motif
         eq6=-D*X3+Y3*f3*X3-kdec3*X3;
         dP=[eq1;eq2;eq3;eq4;eq5;eq6];
         switch growth
-            case 'Thermodynamic'
+            case {'Thermodynamic','Hoh'}
                 dP=[eq1;eq2;eq3;eq4;eq5;eq6];
                 for k=1:length(thermeqs)
                     eval(['eq',num2str(6+k),'=thermeqs(',num2str(k),');'])

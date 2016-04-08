@@ -153,65 +153,57 @@ switch which_plot
                     hold on
                     plot(handles.solutionplot,tout,yout_n(:,1),'linewidth',2,'color','b')
                     hold off
-                    legd=[legd;{'S1'}];
                 else
                 end
                 if x1_check==1
                     hold on
                     plot(handles.solutionplot,tout,yout_n(:,2),'linewidth',2,'color','r')
                     hold off
-                    legd=[legd;{'X1'}];
                 else
                 end
                 if s2_check==1
                     hold on
                     plot(handles.solutionplot,tout,yout_n(:,3),'linewidth',2,'color',[0 0.5 0])
                     hold off
-                    legd=[legd;{'S2'}];
                 else
                 end
                 if x2_check==1
                     hold on
                     plot(handles.solutionplot,tout,yout_n(:,4),'linewidth',2,'color',[1 0.6 0])
                     hold off
-                    legd=[legd;{'X2'}];
                 else
                 end
                 if s3_check==1
                     hold on
                     plot(handles.solutionplot,tout,yout_n(:,5),'linewidth',2,'color',[0.5 0 0.5])
                     hold off
-                    legd=[legd;handles.var_names(5,:)];
                 else
                 end
                 if x3_check==1
                     hold on
                     plot(handles.solutionplot,tout,yout_n(:,6),'linewidth',2,'color',[0.302 0.745 0.933])
                     hold off
-                    legd=[legd;handles.var_names(6,:)];
                 else
                 end
                 if s4_check==1
                     hold on
                     plot(handles.solutionplot,tout,yout_n(:,7),'linewidth',2,'color',[0 1 1])
                     hold off
-                    legd=[legd;handles.var_names(7,:)];
                 else
                 end
                 if s5_check==1
                     hold on
                     plot(handles.solutionplot,tout,yout_n(:,8),'linewidth',2,'color',[1 0.6 0.784])
                     hold off
-                    legd=[legd;handles.var_names(8,:)];
                 else
                 end
                 if s6_check==1
                     hold on
                     plot(handles.solutionplot,tout,yout_n(:,9),'linewidth',2,'color',[0.314 0.314 0.314])
-                    hold off
-                    legd=[legd;handles.var_names(9,:)];
+                    hold off                    
                 else
                 end
+                legd=handles.var_names;
                 hold on
                 %adds axis labels
                 xlabel(handles.solutionplot,'Time (days)')

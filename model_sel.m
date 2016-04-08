@@ -6,7 +6,7 @@ function motif_out=model_sel(handles)
 % email address: matthew.wade@ncl.ac.uk; dr.matthewwade@ncl.ac.uk
 % alternative contact: Dr. Nick Parker, nick.parker@ncl.ac.uk
 % Website: https://github.com/MI-SIM/MI-SIM
-% February 2015; Last revision: 11-Mar-2016
+% February 2015; Last revision: 1-Apr-2016
 
 set(handles.infotable,'Visible','off');
 set(handles.stabtable,'Visible','off');
@@ -25,9 +25,9 @@ switch handles.motif_name
         set(handles.s1_check,'value',1,'enable','on'); set(handles.x1_check,'value',1,'enable','on')
         set(handles.s2_check,'value',1,'enable','on'); set(handles.x2_check,'value',1,'enable','on')
         set(handles.s3_check,'value',0,'enable','off'); set(handles.x3_check,'value',0,'enable','off')
-        set(handles.s3_init,'enable','off'); set(handles.s3_init_text,'enable','off')
+        set(handles.s3_init,'enable','off'); set(handles.S3_0,'enable','off')
         set(handles.s2_init,'enable','on'); set(handles.x3_init,'enable','off')
-        set(handles.x3_init_text,'enable','off'); set(handles.S2_0,'enable','on')
+        set(handles.X3_0,'enable','off'); set(handles.S2_0,'enable','on')
         set(handles.s2in_in,'enable','off'); set(handles.text55,'enable','off')
         set(handles.s3in_in,'enable','off'); set(handles.text48,'enable','off')
         set(handles.timeplot,'checked','on'); set(handles.phaseplot,'checked','off')
@@ -70,7 +70,7 @@ switch handles.motif_name
         set(handles.text16,'Enable','on');set(handles.text19,'Enable','on')
         set(handles.text43,'Enable','off');set(handles.text44,'Enable','off')
         set(handles.text45,'Enable','off');set(handles.text47,'Enable','off')
-        set(handles.text82,'Enable','off');set(handles.text83,'Enable','off')
+        set(handles.gam_text1,'Enable','off');set(handles.gam_text2,'Enable','off')
         
         handles.plotsolution='time'; handles.plotdim='two';
         
@@ -105,15 +105,15 @@ switch handles.motif_name
         set(handles.spmatrix,'Visible','off'); axes(handles.spmatrix); cla
         handles.motif='sc';
         axes(handles.motif_image)
-        imshow('motifs_images/sc.png');
+        imshow('motifs_images/sc.png','InitialMagnification','fit');
         set(handles.plot_button,'enable','off')
         set(handles.plot_button2,'enable','off')
         set(handles.s1_check,'value',1,'enable','on'); set(handles.x1_check,'value',1,'enable','on')
         set(handles.s2_check,'value',0,'enable','off'); set(handles.x2_check,'value',1,'enable','on')
         set(handles.s3_check,'value',0,'enable','off'); set(handles.x3_check,'value',0,'enable','off')
-        set(handles.s3_init,'enable','off'); set(handles.s3_init_text,'enable','off')
+        set(handles.s3_init,'enable','off'); set(handles.S3_0,'enable','off')
         set(handles.s2_init,'enable','off');set(handles.x3_init,'enable','off')
-        set(handles.x3_init_text,'enable','off'); set(handles.S2_0,'enable','off')
+        set(handles.X3_0,'enable','off'); set(handles.S2_0,'enable','off')
         set(handles.s2in_in,'enable','off'); set(handles.text55,'enable','off')
         set(handles.s3in_in,'enable','off'); set(handles.text48,'enable','off')
         set(handles.ks32_in,'enable','off','String',1e-6); set(handles.text81,'enable','off')
@@ -147,7 +147,7 @@ switch handles.motif_name
         set(handles.kdec3_in,'Enable','off','String',0);
         set(handles.ks3_in,'Enable','off','String',0);
         set(handles.ks32_in,'Enable','off','String',0);
-        set(handles.gamma0,'Enable','on','String',0.43);
+        set(handles.gamma0,'Enable','off','String',0);
         set(handles.gamma1,'Enable','off','String',0);
         set(handles.gamma2,'Enable','off','String',0); 
         set(handles.gamma3,'Enable','off','String',0);
@@ -157,7 +157,7 @@ switch handles.motif_name
         
         set(handles.text43,'Enable','off');set(handles.text44,'Enable','off')
         set(handles.text45,'Enable','off');set(handles.text47,'Enable','off')
-        set(handles.text82,'Enable','off');set(handles.text83,'Enable','off')
+        set(handles.gam_text1,'Enable','off');set(handles.gam_text2,'Enable','off')
         
         axes(handles.trajectoryplot)
         colorbar off
@@ -173,12 +173,26 @@ switch handles.motif_name
         
         handles.params_sim=strvcat('S1in','D','km1','Ks1','Y1','km2','Ks2','Y2','kdec1','kdec2');
         handles.var_names=strvcat('S1','X1','X2');
-        eqtext = strvcat(eqtx1,eqtx2,eqtx3);
+        xpos=0.7;
+        switch growth
+            case {'Hoh'}
+                xpos=0.82;
+                strB=[{'S1'},{'X1'},{'X2'}];
+                for k=1:length(handles.steqs)
+                    strB=[strB,handles.steqs{k}];
+                end
+                
+                [strC,indC]=unique(strB,'first');
+                handles.var_names=char(strB(sort(indC)));
+
+        end
+        
+        eqtext = strvcat(eqtx1,eqtx2,eqtx3,eqtx5T);
         cla(handles.txax)
         axes(handles.txax)
         
         text(0,0.5,eqtext,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
-        text(0.7,0.5,handles.fnctext,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
+        text(xpos,0.5,handles.fnctext,'interpreter','latex','horiz','left','vert','middle','fontsize',14)
         handles.eqtx=eqtext;
         
     case 'Predation'
@@ -195,9 +209,9 @@ switch handles.motif_name
         set(handles.s1_check,'value',1,'enable','on'); set(handles.x1_check,'value',1,'enable','on')
         set(handles.s2_check,'value',1,'enable','on'); set(handles.x2_check,'value',1,'enable','on')
         set(handles.s3_check,'value',1,'enable','on'); set(handles.x3_check,'value',0,'enable','off')
-        set(handles.s3_init,'enable','on'); set(handles.s3_init_text,'enable','on')
+        set(handles.s3_init,'enable','on'); set(handles.S3_0,'enable','on')
         set(handles.s2_init,'enable','on');set(handles.x3_init,'enable','off')
-        set(handles.x3_init_text,'enable','off'); set(handles.S2_0,'enable','on')
+        set(handles.X3_0,'enable','off'); set(handles.S2_0,'enable','on')
         set(handles.s2in_in,'enable','off'); set(handles.text55,'enable','off')
         set(handles.s3in_in,'enable','off'); set(handles.text48,'enable','off')
         set(handles.ks32_in,'enable','off','String',1e-6); set(handles.text81,'enable','off')
@@ -240,7 +254,7 @@ switch handles.motif_name
         set(handles.text16,'Enable','on');set(handles.text19,'Enable','on')
         set(handles.text43,'Enable','off');set(handles.text44,'Enable','off')
         set(handles.text45,'Enable','off');set(handles.text47,'Enable','off')
-        set(handles.text82,'Enable','off');set(handles.text83,'Enable','off')
+        set(handles.gam_text1,'Enable','off');set(handles.gam_text2,'Enable','off')
         
         axes(handles.trajectoryplot)
         colorbar off
@@ -281,9 +295,9 @@ switch handles.motif_name
         set(handles.s1_check,'value',1,'enable','on'); set(handles.x1_check,'value',1,'enable','on')
         set(handles.s2_check,'value',1,'enable','on'); set(handles.x2_check,'value',1,'enable','on')
         set(handles.s3_check,'value',0,'enable','off'); set(handles.x3_check,'value',0,'enable','off')
-        set(handles.s3_init,'enable','off'); set(handles.s3_init_text,'enable','off')
+        set(handles.s3_init,'enable','off'); set(handles.S3_0,'enable','off')
         set(handles.s2_init,'enable','on');set(handles.x3_init,'enable','off')
-        set(handles.x3_init_text,'enable','off'); set(handles.S2_0,'enable','on')
+        set(handles.X3_0,'enable','off'); set(handles.S2_0,'enable','on')
         set(handles.s2in_in,'enable','on'); set(handles.text55,'enable','on')
         set(handles.s3in_in,'enable','off'); set(handles.text48,'enable','off')
         set(handles.ks32_in,'enable','off','String',1e-6); set(handles.text81,'enable','off')
@@ -326,7 +340,7 @@ switch handles.motif_name
         
         set(handles.text43,'Enable','off');set(handles.text44,'Enable','off')
         set(handles.text45,'Enable','off');set(handles.text47,'Enable','off')
-        set(handles.text82,'Enable','off');set(handles.text83,'Enable','off')
+        set(handles.gam_text1,'Enable','off');set(handles.gam_text2,'Enable','off')
         
         axes(handles.trajectoryplot)
         colorbar off
@@ -365,9 +379,9 @@ switch handles.motif_name
         set(handles.s1_check,'value',1,'enable','on'); set(handles.x1_check,'value',1,'enable','on')
         set(handles.s2_check,'value',1,'enable','on'); set(handles.x2_check,'value',1,'enable','on')
         set(handles.s3_check,'value',0,'enable','off'); set(handles.x3_check,'value',0,'enable','off')
-        set(handles.s3_init,'enable','off'); set(handles.s3_init_text,'enable','off')
+        set(handles.s3_init,'enable','off'); set(handles.S3_0,'enable','off')
         set(handles.s2_init,'enable','on');set(handles.x3_init,'enable','off')
-        set(handles.x3_init_text,'enable','off'); set(handles.S2_0,'enable','on')
+        set(handles.X3_0,'enable','off'); set(handles.S2_0,'enable','on')
         set(handles.s2in_in,'enable','off'); set(handles.text55,'enable','off')
         set(handles.s3in_in,'enable','off'); set(handles.text48,'enable','off')
         set(handles.ks32_in,'enable','off','String',1e-6); set(handles.text81,'enable','off')
@@ -409,7 +423,7 @@ switch handles.motif_name
         set(handles.text16,'Enable','on');set(handles.text19,'Enable','on')
         set(handles.text43,'Enable','off');set(handles.text44,'Enable','off')
         set(handles.text45,'Enable','off');set(handles.text47,'Enable','off')
-        set(handles.text82,'Enable','off');set(handles.text83,'Enable','off')
+        set(handles.gam_text1,'Enable','off');set(handles.gam_text2,'Enable','off')
         
         axes(handles.trajectoryplot)
         colorbar off
@@ -433,7 +447,7 @@ switch handles.motif_name
 
         handles.var_names=strvcat('S1','X1','S2','X2');
         switch growth
-            case 'Thermodynamic'
+            case {'Thermodynamic','Hoh'}
                 handles.var_names=strvcat('S1','X1','S2','X2',char(handles.steqs));
         end
         
@@ -465,9 +479,9 @@ switch handles.motif_name
         set(handles.s1_check,'value',1,'enable','on'); set(handles.x1_check,'value',1,'enable','on')
         set(handles.s2_check,'value',1,'enable','on'); set(handles.x2_check,'value',1,'enable','on')
         set(handles.s3_check,'value',1,'enable','on'); set(handles.x3_check,'value',0,'enable','off')
-        set(handles.s3_init,'enable','on'); set(handles.s3_init_text,'enable','on')
+        set(handles.s3_init,'enable','on'); set(handles.S3_0,'enable','on')
         set(handles.s2_init,'enable','on'); set(handles.x3_init,'enable','off')
-        set(handles.x3_init_text,'enable','off'); set(handles.S2_0,'enable','on')
+        set(handles.X3_0,'enable','off'); set(handles.S2_0,'enable','on')
         set(handles.s2in_in,'enable','off'); set(handles.text55,'enable','off')
         set(handles.s3in_in,'enable','on'); set(handles.text48,'enable','on')
         set(handles.ks32_in,'enable','off','String',1e-6); set(handles.text81,'enable','off')
@@ -509,7 +523,7 @@ switch handles.motif_name
         set(handles.text16,'Enable','off');set(handles.text19,'Enable','off')
         set(handles.text43,'Enable','on');set(handles.text44,'Enable','on')
         set(handles.text45,'Enable','on');set(handles.text47,'Enable','on')
-        set(handles.text82,'Enable','off'); set(handles.text83,'Enable','off')
+        set(handles.gam_text1,'Enable','off'); set(handles.gam_text2,'Enable','off')
         
         axes(handles.trajectoryplot)
         colorbar off
@@ -550,14 +564,14 @@ switch handles.motif_name
         set(handles.s1_check,'value',1,'enable','on'); set(handles.x1_check,'value',1,'enable','on')
         set(handles.s2_check,'value',1,'enable','on'); set(handles.x2_check,'value',1,'enable','on')
         set(handles.s3_check,'value',1,'enable','on'); set(handles.x3_check,'value',1,'enable','on')
-        set(handles.s3_init,'enable','on'); set(handles.s3_init_text,'enable','on')
+        set(handles.s3_init,'enable','on'); set(handles.S3_0,'enable','on')
         set(handles.s2_init,'enable','on'); set(handles.x3_init,'enable','on')
-        set(handles.x3_init_text,'enable','on'); set(handles.S2_0,'enable','on')
+        set(handles.X3_0,'enable','on'); set(handles.S2_0,'enable','on')
         set(handles.text55,'enable','on'); set(handles.text48,'enable','on')
         set(handles.text43,'enable','on'); set(handles.text44,'enable','on')
         set(handles.text45,'enable','on'); set(handles.text47,'enable','on')
-        set(handles.text81,'enable','on'); set(handles.text82,'enable','on')
-        set(handles.text83,'enable','on');
+        set(handles.text81,'enable','on'); set(handles.gam_text1,'enable','on')
+        set(handles.gam_text2,'enable','on');
         
         %Parameters
         set(handles.km1_in,'String',29.12);
