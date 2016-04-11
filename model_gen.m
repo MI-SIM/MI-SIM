@@ -92,7 +92,7 @@ switch motif
             case 'Hoh'
                 dP=[eq1;eq2;eq3];
                 for k=1:length(thermeqs)
-                    eval(['eq',num2str(3+k),'=thermeqs{',num2str(k),'};'])
+                    eval(['eq',num2str(3+k),'=thermeqs(',num2str(k),');'])
                     try
                         dP=[dP;eval(['eq',num2str(3+k)])];
                     catch
