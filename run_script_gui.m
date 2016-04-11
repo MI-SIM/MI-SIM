@@ -108,35 +108,64 @@ switch handles.simtype
         extra_init(end)=']';
         dgts=str2num(get(handles.prec_num,'String'));
         digits(dgts)
-        sol=feval(symengine,'solve',simplify(eval(eqnl)),eqvr);
+        try
+            sol=feval(symengine,'solve',simplify(eval(eqnl)),eqvr);
+            
+            try
+                temp=vpa(sol);
+                members=children(children(temp));
+                solutions = cellfun(@(c)c(:),members,'UniformOutput',false);
+                num_sol=children(solutions{2});
+                %Check for valid imaginary parts
+                s_imag=sum(any(imag(double(vpa(num_sol)))>1e-12));
+                if s_imag==0
+                    doub_sol=real(double(vpa(num_sol)));
+                else
+                    doub_sol=double(vpa(num_sol));
+                end
+            catch
+                doub_sol=zeros(numel(sol),6);
+                for i=1:numel(sol)
+                    % Loop over the number of solutions
+                    a=sol(i);
+                    for j=1:numel(a)
+                        % Loop over how many component
+                        b=children(a(j));
+                        doub_sol(i,j)=double(b(2));
+                    end
+                end
+            end
+        catch
+            sol=feval(symengine,'solve',eval(eqnl),eqvr);
+            try
+                temp=vpa(sol);
+                members=children(children(temp));
+                solutions = cellfun(@(c)c(:),members,'UniformOutput',false);
+                num_sol=children(solutions{2});
+                %Check for valid imaginary parts
+                s_imag=sum(any(imag(double(vpa(num_sol)))>1e-12));
+                if s_imag==0
+                    doub_sol=real(double(vpa(num_sol)));
+                else
+                    doub_sol=double(vpa(num_sol));
+                end
+            catch
+                doub_sol=zeros(numel(sol),6);
+                for i=1:numel(sol)
+                    % Loop over the number of solutions
+                    a=sol(i);
+                    for j=1:numel(a)
+                        % Loop over how many component
+                        b=children(a(j));
+                        doub_sol(i,j)=double(b(2));
+                    end
+                end
+            end
+        end
         digits 32
         clhead=clvr;
         
         init2=eval(extra_init);
-        try
-            temp=vpa(sol);
-            members=children(children(temp));
-            solutions = cellfun(@(c)c(:),members,'UniformOutput',false);
-            num_sol=children(solutions{2});
-            %Check for valid imaginary parts
-            s_imag=sum(any(imag(double(vpa(num_sol)))>1e-12));
-            if s_imag==0
-                doub_sol=real(double(vpa(num_sol)));
-            else
-                doub_sol=double(vpa(num_sol));
-            end
-        catch
-            doub_sol=zeros(numel(sol),6);
-            for i=1:numel(sol)
-                % Loop over the number of solutions
-                a=sol(i);
-                for j=1:numel(a)
-                    % Loop over how many component
-                    b=children(a(j));
-                    doub_sol(i,j)=double(b(2));
-                end
-            end
-        end
         
         %Set ticks
         set(handles.s1_check,'Enable','off','Value',0); set(handles.x1_check,'Enable','off','Value',0); set(handles.s2_check,'Enable','off','Value',0);
@@ -167,8 +196,8 @@ switch handles.simtype
                 
         %% Stability
         %Shows the stability of the fixed points in the GUI
-       %stability_analysis
-       %set(handles.stabtable,'Visible','on','Data',[s',s2'],'RowName',rnm)
+        stability_analysis
+        set(handles.stabtable,'Visible','on','Data',[s',s2'],'RowName',rnm)
         
         %Options for ODE solver
         if jacobanaly==1
