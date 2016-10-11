@@ -26,11 +26,11 @@ switch growth
         end
         var=[km1 Y1 kdec1 km2 Y2 kdec2 km3 Y3 kdec3 KI2 D S1in S2in S3in time1 Ks1 Ks2 Ks3 Ks3c gamma0 gamma1 gamma2 newgam]; 
         
-    case 'Hoh'
-        newgam={};
-        for k=1:length(str2num(char(gammas)))
-            newgam=[newgam,{['gamma',num2str(2+k)]}];
-        end
-        var=[km1 Y1 kdec1 km2 Y2 kdec2 km3 Y3 kdec3 KI2 D S1in S2in S3in time1 Ks1 Ks2 Ks3 Ks3c gamma0 gamma1 gamma2 newgam];
+%     case 'Hoh'
+%         newgam={};
+%         for k=1:length(str2num(char(gammas)))
+%             newgam=[newgam,{['gamma',num2str(2+k)]}];
+%         end
+%         var=[km1 Y1 kdec1 km2 Y2 kdec2 km3 Y3 kdec3 KI2 D S1in S2in S3in time1 Ks1 Ks2 Ks3 Ks3c gamma0 gamma1 gamma2 newgam];
 end
 

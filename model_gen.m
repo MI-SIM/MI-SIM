@@ -39,7 +39,7 @@ switch growth
         n1=parameters(23);
         n2=parameters(24);
         n3=parameters(25);
-    case {'Thermodynamic','Hoh'}
+    case {'Thermodynamic'}
         for k=1:length(gammas)
            eval(['gamma',num2str(2+k),'=gammas(',num2str(k),');']) 
         end
@@ -88,19 +88,19 @@ switch motif
         eq4=[]; eq5=[]; eq6=[];
                 
         dP=[eq1;eq2;eq3;eq4;eq5;eq6];
-        switch growth
-            case 'Hoh'
-                dP=[eq1;eq2;eq3];
-                for k=1:length(thermeqs)
-                    eval(['eq',num2str(3+k),'=thermeqs(',num2str(k),');'])
-                    try
-                        dP=[dP;eval(['eq',num2str(3+k)])];
-                    catch
-                        dP=[dP;['eq',num2str(3+k)]];
-                    end
-                end
-                dP=eval(dP);
-        end
+%         switch growth
+%             case 'Hoh'
+%                 dP=[eq1;eq2;eq3];
+%                 for k=1:length(thermeqs)
+%                     eval(['eq',num2str(3+k),'=thermeqs(',num2str(k),');'])
+%                     try
+%                         dP=[dP;eval(['eq',num2str(3+k)])];
+%                     catch
+%                         dP=[dP;['eq',num2str(3+k)]];
+%                     end
+%                 end
+%                 dP=eval(dP);
+%         end
 
     case 'fci'
         f1=gnum(1); f2=gnum(2);
@@ -186,7 +186,7 @@ switch motif
         eq6=-D*X3+Y3*f3*X3-kdec3*X3;
         dP=[eq1;eq2;eq3;eq4;eq5;eq6];
         switch growth
-            case {'Thermodynamic','Hoh'}
+            case {'Thermodynamic'}
                 dP=[eq1;eq2;eq3;eq4;eq5;eq6];
                 for k=1:length(thermeqs)
                     eval(['eq',num2str(6+k),'=thermeqs(',num2str(k),');'])

@@ -207,7 +207,7 @@ switch which_plot
                 hold on
                 %adds axis labels
                 xlabel(handles.solutionplot,'Time (days)')
-                ylabel(handles.solutionplot,'Concentration (kgCOD m^{-3})')
+                ylabel(handles.solutionplot,'Concentration')
                 ylimit=get(handles.solutionplot,'Ylim');
                 set(handles.solutionplot,'Ylim',[0 ylimit(2)]);
                 handles.legend1=legend(legd,'location','best');
@@ -350,7 +350,7 @@ switch which_plot
                 AxesH    = findobj(handles.hsub, 'Type', 'Axes');
                 YLabelHC = get(AxesH, 'YLabel'); XLabelHC = get(AxesH,'XLabel');
                 YLabelH  = [YLabelHC{:}]; XLabelH  = [XLabelHC{:}];
-                set(YLabelH, 'String', 'Conc. (kgCOD/m^3)')
+                set(YLabelH, 'String', 'Conc.')
                 set(XLabelH, 'String', 'Time (d)')
                 
                 %suplabel('Time (days)');

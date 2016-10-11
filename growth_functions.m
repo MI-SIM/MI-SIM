@@ -419,7 +419,7 @@ switch growth
                 if dse~=1
                     gamma=str2num(get(handles.gamma0,'String')); exg=0;
                     while isempty(out)
-                        [handles.thermeqs,eqtx5T,handles.gammas,handles.steqs,handles.dG,handles.dG_acc,handles.Temperature]=thermo_calc(handles.motif_name,gamma);
+                        [handles.thermeqs,eqtx5T,handles.gammas,handles.steqs,handles.dG,handles.dG_acc,handles.Temperature]=thermo_calc(handles.motif_name,gamma,growth,1);
                         if handles.thermeqs{1}=='Null'
                             return
                         end
@@ -456,7 +456,7 @@ switch growth
                 else
                     gamma=str2num(get(handles.gamma1,'String')); exg=1;
                     while isempty(out)
-                        [handles.thermeqs,eqtx5T,handles.gammas,handles.steqs,handles.dG,handles.dG_acc,handles.Temperature]=thermo_calc(handles.motif_name,gamma);
+                        [handles.thermeqs,eqtx5T,handles.gammas,handles.steqs,handles.dG,handles.dG_acc,handles.Temperature]=thermo_calc(handles.motif_name,gamma,growth,1);
                         if handles.thermeqs{1}=='Null'
                             return
                         end
@@ -499,90 +499,82 @@ switch growth
             set(handles.S3_0,'Enable','on')
         end
         
-    case 'Hoh' %Hoh Model
-        f3tx = '';
-        switch motif
-            
-            case {'sc'}
-                
-                if dse==1
-                    warning off
-                    IG1a = (1-exp(sym(handles.dG{1}))); IG1b = (1+handles.kr{1}*exp(sym(handles.dG{1})));
-                    IG2a = (1-exp(sym(handles.dG{2}))); IG2b = (1+handles.kr{2}*exp(sym(handles.dG{2})));
-                    f1=km1*(S1*IG1a)/(Ks1+(S1*IG1b));
-                    f2=km2*(S1*IG2a)/(Ks2+(S1*IG2b));
-                else
-                    gamma = {''};
-                    for xnum=1:2
-                        out=[];
-                        while isempty(out)
-                            if xnum==1
-                                [handles.thermeqs{xnum},eqtx,handles.gammas{xnum},handles.steqs{xnum},handles.dG{xnum},handles.dG_acc,handles.Temperature,handles.kr{xnum},handles.cmp_names,handles.gamma_count]=thermo_calc(handles.motif_name,gamma,growth,xnum);
-                            else
-                                [handles.thermeqs,eqtx,handles.gammas{xnum},handles.steqs{xnum},handles.dG{xnum},handles.dG_acc,handles.Temperature,handles.kr{xnum}]=thermo_calc(handles.motif_name,gamma,growth,xnum,handles.cmp_names,handles.thermeqs,eqtx,handles.gamma_count);
-                            end
-                            try
-                                if handles.thermeqs{1}=='Null'
-                                    return
-                                end
-                            catch
-                                try
-                                    if handles.thermeqs(1)=='Null'
-                                        return
-                                    end
-                                catch
-                                    if handles.thermeqs{1}{1}=='Null'
-                                        return
-                                    end
-                                    
-                                end
-                            end
-                            out=1;
-                        end
-                        
-                    end
-                    eqtx5T=eqtx;
-                    I2tx = '';
-                    
-                    set(handles.n1_in,'Enable','off','String',3)
-                    set(handles.n2_in,'Enable','off','String',3)
-                    set(handles.n3_in,'Enable','off','String',3)
-                    set(handles.text20,'Enable','off','String','n1')
-                    set(handles.text21,'Enable','off','String','n2')
-                    set(handles.text46,'Enable','off','String','n3')
-                    
-                    f1tx = '$f_1 = \frac{k_{m,1}S_1\Gamma_1^\alpha}{K_{S,1} + S_1\Gamma_1^\beta}$';
-                    f2tx = '$f_2 = \frac{k_{m,2}S_1\Gamma_2^\beta}{K_{S,2} + S_1\Gamma_2^\beta}$';
-                    I2tx = strvcat('$\Gamma_n^\alpha = (1-exp(\Delta G_n))$','$\Gamma_n^\beta = (1+k_{r,n}exp(\Delta G_n))$');
-                    
-                    set(handles.gam_text0,'Enable','off')
-                    %Get number of gammas
-                    len_gam=sum(cellfun('length',handles.gammas));
-                    gams=[];
-                    for kl = 1: length(handles.gammas)
-                        gams=[gams,cellfun(@str2num,handles.gammas{kl})];
-                    end
-                    for k=1:len_gam
-                        eval(['set(handles.gamma',num2str(k),',''Visible'',''on'',''enable'',''on'',''String'',gams(',num2str(k),'))']);
-                        eval(['set(handles.gam_text',num2str(k),',''Visible'',''on'',''enable'',''on'')']);
-                    end
-                    
-                    %Set initial conditions dependent on variables
-                    unqVars=unique([handles.steqs{1},handles.steqs{2}]);
-                    for k=1:length(unqVars)
-                        eval(['set(handles.',lower(unqVars{k}),'_init,''Enable'',''on'',''String'',0.1)'])
-                        eval(['set(handles.',unqVars{k},'_0,''Enable'',''on'')'])
-                    end
-
-                end
-                
-            case {'pi','ths','fc','fci','ni','syn'}
-                
-                return
-                
-        end
+%     case 'Hoh' %Hoh Model
+%         f3tx = '';
+%         
+%         if dse==1
+%             warning off
+%             IG1a = (1-exp(sym(handles.dG{1}))); IG1b = (1+handles.kr{1}*exp(sym(handles.dG{1})));
+%             IG2a = (1-exp(sym(handles.dG{2}))); IG2b = (1+handles.kr{2}*exp(sym(handles.dG{2})));
+%             f1=km1*(S1*IG1a)/(Ks1+(S1*IG1b));
+%             f2=km2*(S1*IG2a)/(Ks2+(S1*IG2b));
+%         else
+%             gamma=str2num(get(handles.gamma0,'String')); 
+%             for xnum=1:2
+%                 out=[];
+%                 while isempty(out)
+%                     if xnum==1
+%                         [handles.thermeqs{xnum},eqtx,handles.gammas{xnum},handles.steqs{xnum},handles.dG{xnum},handles.dG_acc,handles.Temperature,handles.kr{xnum},handles.cmp_names,handles.gamma_count]=thermo_calc(handles.motif_name,gamma,growth,xnum);
+%                     else
+%                         [handles.thermeqs,eqtx,handles.gammas{xnum},handles.steqs{xnum},handles.dG{xnum},handles.dG_acc,handles.Temperature,handles.kr{xnum}]=thermo_calc(handles.motif_name,gamma,growth,xnum,handles.cmp_names,handles.thermeqs,eqtx,handles.gamma_count);
+%                     end
+%                     try
+%                         if handles.thermeqs{1}=='Null'
+%                             return
+%                         end
+%                     catch
+%                         try
+%                             if handles.thermeqs(1)=='Null'
+%                                 return
+%                             end
+%                         catch
+%                             if handles.thermeqs{1}{1}=='Null'
+%                                 return
+%                             end
+%                             
+%                         end
+%                     end
+%                     out=1;
+%                 end
+%                 
+%             end
+%             eqtx5T=eqtx;
+%             I2tx = '';
+%             
+%             set(handles.n1_in,'Enable','off','String',3)
+%             set(handles.n2_in,'Enable','off','String',3)
+%             set(handles.n3_in,'Enable','off','String',3)
+%             set(handles.text20,'Enable','off','String','n1')
+%             set(handles.text21,'Enable','off','String','n2')
+%             set(handles.text46,'Enable','off','String','n3')
+%             
+%             f1tx = '$f_1 = \frac{k_{m,1}S_1\Gamma_1^\alpha}{K_{S,1} + S_1\Gamma_1^\beta}$';
+%             f2tx = '$f_2 = \frac{k_{m,2}S_1\Gamma_2^\beta}{K_{S,2} + S_1\Gamma_2^\beta}$';
+%             I2tx = strvcat('$\Gamma_n^\alpha = (1-exp(\Delta G_n))$','$\Gamma_n^\beta = (1+k_{r,n}exp(\Delta G_n))$');
+%             
+%             set(handles.gam_text0,'Enable','off')
+%             %Get number of gammas
+%             len_gam=sum(cellfun('length',handles.gammas));
+%             gams=[];
+%             for kl = 1: length(handles.gammas)
+%                 gams=[gams,cellfun(@str2num,handles.gammas{kl})];
+%             end
+%             for k=1:len_gam
+%                 eval(['set(handles.gamma',num2str(k),',''Visible'',''on'',''enable'',''on'',''String'',gams(',num2str(k),'))']);
+%                 eval(['set(handles.gam_text',num2str(k),',''Visible'',''on'',''enable'',''on'')']);
+%             end
+%             
+%             %Set initial conditions dependent on variables
+%             unqVars=unique([handles.steqs{1},handles.steqs{2}]);
+%             for k=1:length(unqVars)
+%                 eval(['set(handles.',lower(unqVars{k}),'_init,''Enable'',''on'',''String'',0.1)'])
+%                 eval(['set(handles.',unqVars{k},'_0,''Enable'',''on'')'])
+%             end
+%             
+%         end
         
 end
+
 if dse~=1
     handles.fnctext = strvcat(f1tx,f2tx,f3tx,I2tx);
 end

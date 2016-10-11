@@ -51,8 +51,7 @@ switch motif
                 end
                 
         end
-        
-        
+           
     case 'fci'
         
         I3=1/(1+S3/KI2);

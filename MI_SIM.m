@@ -22,7 +22,7 @@ function varargout = MI_SIM(varargin)
 
 % Edit the above text to modify the response to help MI_SIM
 
-% Last Modified by GUIDE v2.5 08-Apr-2016 13:41:50
+% Last Modified by GUIDE v2.5 04-Oct-2016 14:46:08
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -43,7 +43,6 @@ else
 end
 % End initialization code - DO NOT EDIT
 
-
 % --- Executes just before MI_SIM is made visible.
 function MI_SIM_OpeningFcn(hObject, eventdata, handles, varargin)
 %pwd=MISIM_nu2016;
@@ -55,7 +54,7 @@ axes(handles.trajectoryplot);
 cla reset
 
 xlabel(handles.solutionplot,'Time (days)')
-ylabel(handles.solutionplot,'Concentration (kgCOD m^{-3})')
+ylabel(handles.solutionplot,'Concentration') %%%%%%%%%%CHANGE UNITS%%%%%%%%%%%
 
 set(handles.twodimplot,'Checked','on'); set(handles.threedimplot,'Checked','off')
 set(handles.timeplot,'Checked','on'); set(handles.phaseplot,'Checked','off'); set(handles.eigplot,'Checked','off')
@@ -89,8 +88,9 @@ set(handles.gamma5,'Visible','off','enable','off'); set(handles.gam_text5,'Visib
 set(handles.gamma6,'Visible','off','enable','off'); set(handles.gam_text6,'Visible','off','enable','off')
 
 set(handles.furth_plots,'Visible','off')
-handles.simtype='single_p';
-handles.growthmodel='Monod';
+handles.simtype='single_p';                     %Default analysis
+handles.var_names=strvcat('S1','X1','S2','X2'); %Default variable names
+handles.dG_acc=0;
 handles.gui_front=0;
 %For thermodynamics
 handles.gammas=[];
@@ -115,7 +115,7 @@ handles.clcyc=1;
 
 %List of Existing Growth Models
 Exist_Models=[{'Commensalism'};{'Competition'};{'Predation'};{'No_interaction'};{'Cooperation'};{'Amensalism'};{'Threespecies'}];
-Exist_Gmodels=[{'Monod'};{'Contois'};{'Tessier'};{'Moser'};{'Haldane'};{'Andrews'};{'Thermodynamic'};{'Hoh'}];
+Exist_Gmodels=[{'Monod'};{'Contois'};{'Tessier'};{'Moser'};{'Haldane'};{'Andrews'};{'Thermodynamic'}]; %Removed Hoh
 if ~isempty(varargin)
     %Check valid model
     if numel(varargin)==2
@@ -146,7 +146,9 @@ if ~isempty(varargin)
         set(handles.growthmenu,'Value',1);
     end
 else
-    handles.motif_name='Syntrophy';
+    handles.motif_name='Cooperation';
+    handles.growthmodel='Monod';
+    set(handles.growthmenu,'Value',1);
 end
 try
     handles=model_sel(handles);
@@ -163,7 +165,6 @@ guidata(hObject, handles);
 % UIWAIT makes MI_SIM wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
-
 % --- Outputs from this function are returned to the command line.
 function varargout = MI_SIM_OutputFcn(hObject, eventdata, handles)
 try
@@ -175,7 +176,6 @@ end
 function x1_init_Callback(hObject, eventdata, handles)
 X1_init=str2double(get(hObject,'String'));
 
-
 % --- Executes during object creation, after setting all properties.
 function x1_init_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -184,7 +184,6 @@ end
 
 function x2_init_Callback(hObject, eventdata, handles)
 X2_init=str2double(get(hObject,'String'));
-
 
 % --- Executes during object creation, after setting all properties.
 function x2_init_CreateFcn(hObject, eventdata, handles)
@@ -195,24 +194,20 @@ end
 function s1_init_Callback(hObject, eventdata, handles)
 S1_init=str2double(get(hObject,'String'));
 
-
 % --- Executes during object creation, after setting all properties.
 function s1_init_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
-
 function s2_init_Callback(hObject, eventdata, handles)
 S2_init=str2double(get(hObject,'String'));
-
 
 % --- Executes during object creation, after setting all properties.
 function s2_init_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
 
 function s3_init_Callback(hObject, eventdata, handles)
 S3_init=str2double(get(hObject,'String'));
@@ -280,17 +275,14 @@ function km1_in_Callback(hObject, eventdata, handles)
 
 km1=str2double(get(hObject,'String'));
 
-
 % --- Executes during object creation, after setting all properties.
 function km1_in_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
-
 function y1_in_Callback(hObject, eventdata, handles)
 Y1=str2double(get(hObject,'String'));
-
 
 % --- Executes during object creation, after setting all properties.
 function y1_in_CreateFcn(hObject, eventdata, handles)
@@ -301,7 +293,6 @@ end
 function kdec1_in_Callback(hObject, eventdata, handles)
 kdec1=str2double(get(hObject,'String'));
 
-
 % --- Executes during object creation, after setting all properties.
 function kdec1_in_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -310,7 +301,6 @@ end
 
 function km2_in_Callback(hObject, eventdata, handles)
 km2=str2double(get(hObject,'String'));
-
 
 % --- Executes during object creation, after setting all properties.
 function km2_in_CreateFcn(hObject, eventdata, handles)
@@ -321,7 +311,6 @@ end
 function y2_in_Callback(hObject, eventdata, handles)
 Y2=str2double(get(hObject,'String'));
 
-
 % --- Executes during object creation, after setting all properties.
 function y2_in_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -331,7 +320,6 @@ end
 function kdec2_in_Callback(hObject, eventdata, handles)
 kdec2=str2double(get(hObject,'String'));
 
-
 % --- Executes during object creation, after setting all properties.
 function kdec2_in_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -340,7 +328,6 @@ end
 
 function ki2_in_Callback(hObject, eventdata, handles)
 KI2=str2double(get(hObject,'String'));
-
 
 % --- Executes during object creation, after setting all properties.
 function ki2_in_CreateFcn(hObject, eventdata, handles)
@@ -359,7 +346,6 @@ end
 
 function ks2_in_Callback(hObject, eventdata, handles)
 Ks2=str2double(get(hObject,'String'));
-
 
 % --- Executes during object creation, after setting all properties.
 function ks2_in_CreateFcn(hObject, eventdata, handles)
@@ -438,7 +424,6 @@ end
 function d_in_Callback(hObject, eventdata, handles)
 D=str2double(get(hObject,'String'));
 
-
 % --- Executes during object creation, after setting all properties.
 function d_in_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -495,7 +480,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
 function ks32_in_Callback(hObject, eventdata, handles)
 ks3c=str2double(get(hObject,'String'));
 
@@ -506,7 +490,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
 function gamma1_Callback(hObject, eventdata, handles)
 gamma1=str2double(get(hObject,'String'));
 
@@ -516,7 +499,6 @@ function gamma1_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
 
 function gamma2_Callback(hObject, eventdata, handles)
 gamma2=str2double(get(hObject,'String'));
@@ -538,7 +520,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
 function gamma4_Callback(hObject, eventdata, handles)
 gamma4=str2double(get(hObject,'String'));
 
@@ -548,7 +529,6 @@ function gamma4_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
 
 function gamma5_Callback(hObject, eventdata, handles)
 gamma5=str2double(get(hObject,'String'));
@@ -569,7 +549,6 @@ gamma6=str2double(get(hObject,'String'));
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
 
 % --- Executes on selection change in solver.
 function solver_Callback(hObject, eventdata, handles)
@@ -650,7 +629,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
 % --- Executes on button press in plot_button2.
 function plot_button2_Callback(hObject, eventdata, handles)
 which_plot='traj';
@@ -665,11 +643,9 @@ s1_check=get(hObject,'Value');
 function x1_check_Callback(hObject, eventdata, handles)
 x1_check=get(hObject,'Value');
 
-
 % --- Executes on button press in s2_check.
 function s2_check_Callback(hObject, eventdata, handles)
 s2_check=get(hObject,'Value');
-
 
 % --- Executes on button press in x2_check.
 function x2_check_Callback(hObject, eventdata, handles)
@@ -1074,7 +1050,6 @@ handles.growthmodel=contents{get(handles.growthmenu,'Value')};
 handles=model_sel(handles);
 guidata(hObject,handles)
 
-
 % --------------------------------------------------------------------
 function plotoptions_Callback(hObject, eventdata, handles)
 
@@ -1176,7 +1151,6 @@ elseif gvlsa==1
     set(handles.lsanaly,'ForegroundColor',[0.078, 0.169, 0.549])
 end
 
-
 % --- Executes on button press in routhcrit.
 function routhcrit_Callback(hObject, eventdata, handles)
 gvrhc=get(handles.routhcrit,'Value');
@@ -1185,7 +1159,6 @@ if gvrhc==0
 elseif gvrhc==1
     set(handles.routhcrit,'ForegroundColor',[0.078, 0.169, 0.549])
 end
-
 
 % --- Executes on button press in jacobian_but.
 function jacobian_but_Callback(hObject, eventdata, handles)
@@ -1204,7 +1177,6 @@ function pert_p_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
 
 % --------------------------------------------------------------------
 function sim_opts_Callback(hObject, eventdata, handles)
@@ -1290,10 +1262,8 @@ handles.simtype='pport';
 
 guidata(hObject,handles)
 
-
 % --------------------------------------------------------------------
 function gui_opts_Callback(hObject, eventdata, handles)
-
 
 % --------------------------------------------------------------------
 function gui_reset_Callback(hObject, eventdata, handles)
@@ -1342,7 +1312,6 @@ handles.gui_front=0;
 
 guidata(hObject,handles)
 
-
 % --------------------------------------------------------------------
 function gui_restart_Callback(hObject, eventdata, handles)
 close(gcbf)
@@ -1352,10 +1321,8 @@ MI_SIM
 function gui_close_Callback(hObject, eventdata, handles)
 close(gcbf)
 
-
 % --- Executes on selection change in simparam1.
 function simparam1_Callback(hObject, eventdata, handles)
-
 
 % --- Executes during object creation, after setting all properties.
 function simparam1_CreateFcn(hObject, eventdata, handles)
@@ -1442,7 +1409,6 @@ end
 % --- Executes on selection change in simparam3.
 function simparam3_Callback(hObject, eventdata, handles)
 
-
 % --- Executes during object creation, after setting all properties.
 function simparam3_CreateFcn(hObject, eventdata, handles)
 
@@ -1454,14 +1420,12 @@ function min_p3_Callback(hObject, eventdata, handles)
 minp3a = get(handles.min_p3,'String');
 minp3 = str2double(minp3a);
 
-
 % --- Executes during object creation, after setting all properties.
 function min_p3_CreateFcn(hObject, eventdata, handles)
 
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
 
 function max_p3_Callback(hObject, eventdata, handles)
 maxp3a = get(handles.max_p3,'String');
@@ -1473,7 +1437,6 @@ function max_p3_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
 
 % --- Executes on button press in use_3v.
 function use_3v_Callback(hObject, eventdata, handles)
@@ -1493,13 +1456,11 @@ guidata(hObject,handles)
 % --- Executes on button press in parallel.
 function parallel_Callback(hObject, eventdata, handles)
 
-
 % --------------------------------------------------------------------
 function undock_Callback(hObject, eventdata, handles)
 fig=figure;
 ax=axes;
 new_h=copyobj(handles.plothandle,ax,'legacy');
-
 
 % --------------------------------------------------------------------
 function Dimensions_Callback(hObject, eventdata, handles)
@@ -1558,7 +1519,6 @@ end
 % --- Executes on button press in normeig.
 function normeig_Callback(hObject, eventdata, handles)
 
-
 % --------------------------------------------------------------------
 function uiundock_ClickedCallback(hObject, eventdata, handles)
 fig=figure;
@@ -1583,7 +1543,7 @@ if strcmp(val_p,'on') && strcmp(val_pp,'off')
         
     end
     suplabel('Time (days)');
-    suplabel('Concentration (kgCOD m^{-3})','y');
+    suplabel('Concentration','y');
 else
     ax=axes;
     new_h=copyobj(handles.plothandle,ax,'legacy');
@@ -1594,10 +1554,8 @@ else
     axis tight
 end
 
-
 % --------------------------------------------------------------------
 function report_menu_Callback(hObject, eventdata, handles)
-
 
 % --------------------------------------------------------------------
 function gen_rep_Callback(hObject, eventdata, handles)
@@ -1630,7 +1588,6 @@ end
 
 function email_add_Callback(hObject, eventdata, handles)
 
-
 % --- Executes during object creation, after setting all properties.
 function email_add_CreateFcn(hObject, eventdata, handles)
 
@@ -1659,7 +1616,6 @@ end
 cmap = strtrim(strcmap(numstrcmap,:));
 colormap(char(cmap));
 
-
 % --- Executes during object creation, after setting all properties.
 function colormp_CreateFcn(hObject, eventdata, handles)
 
@@ -1668,7 +1624,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 function figure1_SizeChangedFcn(hObject, eventdata, handles)
-
 
 % --- Executes on button press in sendreport.
 function sendreport_Callback(hObject, eventdata, handles)
@@ -1693,7 +1648,6 @@ else
     msgbox('Enter valid e-mail and server address','Error: No valid e-mail');
 end
 
-
 % --- Executes on selection change in furth_plots.
 function furth_plots_Callback(hObject, eventdata, handles)
 which_plot='sol';
@@ -1711,13 +1665,9 @@ switch wp_s
 end
 plot_results;
 
-
 % --- Executes during object creation, after setting all properties.
 function furth_plots_CreateFcn(hObject, eventdata, handles)
 
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
-

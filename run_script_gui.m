@@ -22,7 +22,7 @@ ovro=get(handles.overlay,'Value');
 gammas=[]; thermeqs=[]; dG=[]; init_out=[];
 %For thermodynamics
 switch handles.growthmodel
-    case 'Thermodynamic'
+    case {'Thermodynamic'}
         thermeqs=handles.thermeqs;
         gammas=handles.gammas;
         dG=handles.dG_acc;

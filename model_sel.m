@@ -174,18 +174,18 @@ switch handles.motif_name
         handles.params_sim=strvcat('S1in','D','km1','Ks1','Y1','km2','Ks2','Y2','kdec1','kdec2');
         handles.var_names=strvcat('S1','X1','X2');
         xpos=0.7;
-        switch growth
-            case {'Hoh'}
-                xpos=0.82;
-                strB=[{'S1'},{'X1'},{'X2'}];
-                for k=1:length(handles.steqs)
-                    strB=[strB,handles.steqs{k}];
-                end
-                
-                [strC,indC]=unique(strB,'first');
-                handles.var_names=char(strB(sort(indC)));
-
-        end
+%         switch growth
+%             case {'Hoh'}
+%                 xpos=0.82;
+%                 strB=[{'S1'},{'X1'},{'X2'}];
+%                 for k=1:length(handles.steqs)
+%                     strB=[strB,handles.steqs{k}];
+%                 end
+%                 
+%                 [strC,indC]=unique(strB,'first');
+%                 handles.var_names=char(strB(sort(indC)));
+% 
+%         end
         
         eqtext = strvcat(eqtx1,eqtx2,eqtx3,eqtx5T);
         cla(handles.txax)
@@ -447,7 +447,7 @@ switch handles.motif_name
 
         handles.var_names=strvcat('S1','X1','S2','X2');
         switch growth
-            case {'Thermodynamic','Hoh'}
+            case {'Thermodynamic'}
                 handles.var_names=strvcat('S1','X1','S2','X2',char(handles.steqs));
         end
         
