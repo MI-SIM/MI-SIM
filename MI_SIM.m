@@ -22,7 +22,7 @@ function varargout = MI_SIM(varargin)
 
 % Edit the above text to modify the response to help MI_SIM
 
-% Last Modified by GUIDE v2.5 04-Oct-2016 14:46:08
+% Last Modified by GUIDE v2.5 24-Jan-2017 11:38:08
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -97,6 +97,9 @@ handles.gammas=[];
 handles.thermeqs=[];
 handles.dG=[];
 handles.Temperature=[];
+
+handles.steqs=[]; %Extra variables if thermodynamics used
+
 dir_rep=dir('Reports');
 
 if length(dir_rep)<5

@@ -132,11 +132,10 @@ switch motif
         eq4=-D*X2+Y2*f2*X2*I2-kdec2*X2;
         eq5=D*(S3in-S3)+gamma1*(1-Y2)*f2*X2*I2-f3*X3-gamma2*f1*X1;
         eq6=-D*X3+Y3*f3*X3-kdec3*X3;
-        
+        eqs=[eq1,eq2,eq3,eq4,eq5,eq6];
         switch growth
             
             case 'Thermodynamic'
-                eqs=[eq1,eq2,eq3,eq4,eq5,eq6];
                 for k=1:length(handles.thermeqs)
                     eval(['eq',num2str(5+k),'=eval(handles.thermeqs{',num2str(k),'});'])
                     eqs=[eqs,eval(['eq',num2str(5+k)])];

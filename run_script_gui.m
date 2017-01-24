@@ -63,6 +63,7 @@ end
 %Define system equations
 [eqs, f1, f2, f3, I2, I3, I4]=define_system_equations(motif,growth,handles);
 gfnc=[f1,f2,f3,I2,I3,I4]; %Growth functions
+
 %digits(32) %Set precision
 format long
 %% Algorithms

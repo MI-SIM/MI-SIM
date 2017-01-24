@@ -1,12 +1,12 @@
 function [dP]=model_gen(time, init, parameters,h,h1,gfnc,growth,motif,flag,cno,thermeqs,gammas,dG,init_out,handles)
-%four_mod - calls motif function to be solved with the ODE solver
+%model_gen - calls motif function to be solved with the ODE solver
 %
 % Author: Dr. Matthew Wade, School of Civil Engineering & Geosciences
 % Newcastle University, Newcastle-upon-Tyne UK NE1 7RU
 % email address: matthew.wade@ncl.ac.uk; dr.matthewwade@ncl.ac.uk
 % alternative contact: Dr. Nick Parker, nick.parker@ncl.ac.uk
 % Website: https://github.com/MI-SIM/MI-SIM
-% September 2015; Last revision: 1-Apr-2016
+% September 2015; Last revision: 24-Jan-2017
 
 %Set precision
 digits(32)
@@ -154,8 +154,8 @@ switch motif
         end
         
     case 'pi'
-        f1=gnum(1); f2=gnum(2); f3=gnum(3);
-        I4 = gnum(4);
+        f1=gnum(1); f3=gnum(2);
+        I4 = gnum(3);
         eq1=D*(S1in-S1)-f1*X1;
         eq2=-D*X1+Y1*f1*X1-kdec1*X1;
         eq3=-D*S2+gamma0*(1-Y1)*f1*X1;
